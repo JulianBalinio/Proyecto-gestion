@@ -1,7 +1,13 @@
 # Se definen urls para inventario
-from django.urls import path
-from .views import ProductosAPIView
+from django.urls import path, include
+from .views import ProductosViewSet
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path('productos/', ProductosAPIView.as_view(), name='productos'),
-]
+app_name = 'productos'
+router = DefaultRouter()
+
+router.register(
+    r'productos', ProductosViewSet, basename='productos'
+)
+
+urlpatterns = [path('', include(router.urls))]
