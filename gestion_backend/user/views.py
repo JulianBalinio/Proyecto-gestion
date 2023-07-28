@@ -4,6 +4,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from .models import User
 from .serializers import UserSerializer, LoginSerializer
+from django.contrib.auth import get_user_model
 
 class UserSignUp(generics.CreateAPIView):
     queryset = User.objects.all()
