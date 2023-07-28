@@ -18,3 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email_address = serializers.EmailField()
     password = serializers.CharField(max_length=32)
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(max_length=32, write_only=True)
+    new_password = serializers.CharField(max_length=32, write_only=True, validators=[validate_password])

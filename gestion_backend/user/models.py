@@ -42,3 +42,10 @@ class User(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    def change_password(self, current_password, new_password):
+        if not check_password(current_password, self.password):
+            raise ValueError("Contraseña actual incorrecta.")
+
+        self.password = make_password(new_password)
+        self.save()
