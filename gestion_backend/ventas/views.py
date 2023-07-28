@@ -1,5 +1,5 @@
 from rest_framework.views import Response
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ViewSet
 from drf_yasg.utils import swagger_auto_schema
@@ -70,3 +70,9 @@ class OrderViewset(ViewSet):
 
         serializer = OrderDetailsSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK) 
+
+class OrderCreateView(generics.CreateAPIView):
+    serializer_class = OrderDetailsSerializer
+
+    def perform_create(self, serializer):
+        serializer.save()

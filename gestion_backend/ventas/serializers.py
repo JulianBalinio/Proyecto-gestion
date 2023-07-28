@@ -9,4 +9,5 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
             'order',
             'product',
             'quantity',
+            'user'
         ]

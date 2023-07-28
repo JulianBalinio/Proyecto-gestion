@@ -1,7 +1,9 @@
 from django.db import models
 from inventario.models import Producto
+from user.models import User
 
 class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateField(blank=False, null=False)
 
     def __str__(self):
