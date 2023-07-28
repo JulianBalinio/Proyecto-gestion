@@ -4,7 +4,6 @@ from django.urls import path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from user.views import UserSignIn, UserSignUp
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -22,8 +21,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('api/', include('inventario.urls', namespace='inventario')),
     path('user/', include('user.urls')),
-    path('sign_in/', UserSignIn.as_view(), name='sign_in'),
-    path('sign_up/', UserSignUp.as_view(), name='sign_up'),
     path('ventas/', include('ventas.urls'))
 ]
 
