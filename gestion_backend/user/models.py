@@ -2,8 +2,25 @@ from django.db import models
 from django.core.validators import RegexValidator
 
 class User(models.Model):
-    first_name = models.CharField(max_length=50, null=False, blank=False)
-    last_name = models.CharField(max_length=50, null=False, blank=False)
+    
+    name_validator = RegexValidator(
+        regex=r'^[a-zA-Z]+$',
+        message='El nombre debe contener solo letras.'
+    ) #Esto podria ir en validators.py, pero no me da mas la cabeza
+
+    first_name = models.CharField(
+        max_length=50,
+        null=False, 
+        blank=False, 
+        validators=[name_validator]
+    )
+    
+    last_name = models.CharField(
+        max_length=50, 
+        null=False, 
+        blank=False, 
+        validators=[name_validator]
+    )
 
     email_address = models.EmailField(
         unique=True,
@@ -14,7 +31,8 @@ class User(models.Model):
     phone_validator = RegexValidator(
         regex = phone_regex,
         message = 'El número de teléfono debe tener un formato válido'
-    )
+    )#Esto podria ir en validators.py, pero no me da mas la cabeza
+
     phone = models.CharField(
         validators=[phone_validator], 
         max_length=15, 

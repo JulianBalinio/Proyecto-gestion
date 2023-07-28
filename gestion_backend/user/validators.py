@@ -10,3 +10,4 @@ def validate_password(value):
 
     if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", value):
         raise ValidationError('La contraseña debe contener al menos un caracter especial (por ejemplo: !@#$%^&*(),.?":{}|<>).')
+
