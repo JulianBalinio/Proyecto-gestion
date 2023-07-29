@@ -1,6 +1,7 @@
 # Serializadores para el front
 from rest_framework import serializers
-from .models import Producto
+from .models import Producto, Categoria
+
 
 class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,3 +13,15 @@ class ProductoSerializer(serializers.ModelSerializer):
             'price',
             'category',
         ]
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Categoria
+        fields = [
+            'id',
+            'name',
+        ]
+        extra_kwargs = {
+            'id': {'required': False}
+        }
