@@ -55,7 +55,7 @@ class ProductosViewSet(ViewSet):
             return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
         producto.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CategoryViewSet(ViewSet):

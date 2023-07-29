@@ -1,0 +1,15 @@
+.main {
+  display: flex;
+  flex-direction: column;
+
+  .searchBar {
+    padding: 0 2rem 2rem;
+    display: flex;
+    gap: 2rem;
+  }
+
+  .dataTable {
+    padding: 0 2rem;
+    height: 70vh;
+  }
+}

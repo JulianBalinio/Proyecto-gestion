@@ -1,0 +1,80 @@
+import { useEffect, useState } from "react";
+import { InventoryCalls } from "/src/modules/Inventario/utils/apiCalls";
+import { defaultValues } from "./data";
+import ChangesModalTemplate from "./templates/ChangesModal";
+
+export default function ChangesModal({
+  open,
+  onClose,
+  item,
+  edit,
+  fetchInventory,
+}) {
+  const [producto, setProducto] = useState(defaultValues);
+  const [options, setOptions] = useState([]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProducto((prevProducto) => {
+      return { ...prevProducto, [name]: value };
+    });
+  };
+
+  const handleSave = () => {
+    if (edit) {
+      InventoryCalls.updateProduct({
+        action: () => {
+          fetchInventory();
+          onClose();
+        },
+        data: producto,
+        productId: item.id,
+      });
+    } else {
+      InventoryCalls.createProduct({
+        action: () => {
+          fetchInventory();
+          onClose();
+        },
+        data: producto,
+      });
+    }
+  };
+
+  const handleDelete = () => {
+    InventoryCalls.deleteProduct({
+      action: () => {
+        fetchInventory();
+        onClose();
+      },
+      productId: producto.id,
+    });
+  };
+
+  useEffect(() => {
+    const initializeItem = () => {
+      setProducto((prevProducto) => {
+        return { ...prevProducto, ...item };
+      });
+    };
+
+    item && initializeItem();
+  }, [item]);
+
+  useEffect(() => {
+    InventoryCalls.getCategories({ action: setOptions });
+  }, []);
+
+  return (
+    <ChangesModalTemplate
+      producto={producto}
+      options={options}
+      open={open}
+      onClose={onClose}
+      edit={edit}
+      handleChange={handleChange}
+      handleDelete={handleDelete}
+      handleSave={handleSave}
+    />
+  );
+}

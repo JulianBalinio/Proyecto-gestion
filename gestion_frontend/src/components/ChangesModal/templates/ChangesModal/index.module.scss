@@ -1,0 +1,39 @@
+.drawerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+
+    .title {
+      padding: 2rem;
+      font-size: 2rem;
+      width: 100%;
+    }
+
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+
+      .inputCode {
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+      }
+    }
+
+    li {
+      text-align: center;
+    }
+  }
+}
