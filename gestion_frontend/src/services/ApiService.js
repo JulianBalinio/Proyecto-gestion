@@ -1,3 +1,30 @@
+function snakeToCamelCase(str) {
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+}
+
+function convertKeysSnakeToCamel(obj) {
+  if (typeof obj !== "object" || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => convertKeysSnakeToCamel(item));
+  }
+
+  const convertedObj = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const camelCaseKey = snakeToCamelCase(key);
+      const value = obj[key];
+      convertedObj[camelCaseKey] =
+        typeof value === "object" && value !== null
+          ? convertKeysSnakeToCamel(value)
+          : value;
+    }
+  }
+  return convertedObj;
+}
+
 const Api = {
   getHeaders: () => {
     const headers = {
@@ -25,4 +52,4 @@ const Api = {
   },
 };
 
-export { Api };
+export { Api, convertKeysSnakeToCamel };

@@ -3,9 +3,16 @@ import { Button } from "@mui/material";
 export const getColumns = ({ setItemToEdit, setOpen }) => {
   const columns = [
     { field: "id", headerName: "ID", flex: 2 },
-    { field: "code", headerName: "Código", flex: 2},
+    { field: "code", headerName: "Código", flex: 2 },
     { field: "name", headerName: "Nombre", flex: 10 },
-    { field: "category", headerName: "Categoría", flex: 4 },
+    {
+      field: "category",
+      headerName: "Categoría",
+      flex: 4,
+      renderCell: (params) => {
+        return `${params.value.name}`;
+      },
+    },
     {
       field: "price",
       headerName: "Precio",
