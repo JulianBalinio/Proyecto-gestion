@@ -2,7 +2,9 @@ from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
 from rest_framework.decorators import action, permission_classes
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 
 from django.urls import reverse
@@ -57,24 +59,22 @@ class ChangePasswordView(generics.GenericAPIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     
-class UserLogout(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class UserLogout(APIView):
+    permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['post'])
-    @permission_classes([IsAuthenticated])
-    def logout(self, request):
+    @csrf_exempt  # Proteccion contra CSRF (Cross-Site Request Forgery)
+    def post(self, request):
         try:
+            # Obtener el token de actualización del cuerpo de la solicitud
             refresh_token = request.data.get('refresh_token')
-            if refresh_token:
-                token = RefreshToken(refresh_token)
-                token.blacklist()
-                print(f"refresh_token recibido: {refresh_token}")
-                redirect_url = reverse('sign_in') 
-                return Response({'detail': 'Cierre de sesión exitoso.', 'redirect_to': redirect_url}, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'No se actualizo el token.'}, status=status.HTTP_400_BAD_REQUEST)
+            if not refresh_token:
+                return Response({'error': 'Falta el token de actualización.'}, status=status.HTTP_400_BAD_REQUEST)
+            # Revocar el token de actualización y acceso
+            refresh = RefreshToken(refresh_token)
+            refresh.blacklist()
+            # Redirigir a la página de inicio de sesión después del cierre de sesión exitoso
+            redirect_url = reverse('sign_in')
+            return Response({'detail': 'Cierre de sesión exitoso.', 'redirect_to': redirect_url}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
-            return Response({'error': 'Error al cerrar la sesión.'}, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Response({'error': 'Error al cerrar la sesión.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

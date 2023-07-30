@@ -47,5 +47,8 @@ class User(models.Model):
         if not check_password(current_password, self.password):
             raise ValueError("Contraseña actual incorrecta.")
 
+        if check_password(new_password, self.password):
+            raise ValueError("La nueva contraseña debe ser diferente a la actual.")
+
         self.password = make_password(new_password)
-        self.save()
+        self.save

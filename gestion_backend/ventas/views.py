@@ -40,7 +40,7 @@ class OrderViewset(ViewSet):
             order.delete()
             return Response({'message': 'Orden eliminada exitosamente.'})
         except OrderDetails.DoesNotExist:
-              return Response({'error': 'Orden no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Orden no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
     
     #Update
     @swagger_auto_schema(operation_description="Actualizar orden de compra.")
