@@ -1,5 +1,6 @@
+import uuid
+from datetime import timedelta, timezone
 from django.db import models
-from django.core.validators import RegexValidator
 from django.contrib.auth.hashers import make_password, check_password
 from user.validators import name_validator, phone_validator
 
@@ -34,6 +35,12 @@ class User(models.Model):
 
     password = models.CharField(max_length=32)
 
+    is_active = models.BooleanField(default = True)
+
+    #Campo de token para restablecimiento de contraseña
+    reset_password_token = models.UUIDField(default=uuid.uuid4, editable=False)
+    reset_password_token_created_at = models.DateTimeField(null=True, blank=True)
+
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
 
@@ -52,3 +59,9 @@ class User(models.Model):
 
         self.password = make_password(new_password)
         self.save
+    
+    def is_reset_password_token_valid(self):
+        if not self.reset_password_token_created_at:
+            return False
+        expiration_time = self.reset_password_token_created_at + timedelta(hours=1)  # Expira después de 1 hora
+        return expiration_time >= timezone.now()

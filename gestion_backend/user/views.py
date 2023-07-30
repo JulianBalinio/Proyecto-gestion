@@ -1,12 +1,14 @@
-from rest_framework import generics, status, viewsets
+import uuid
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
-from rest_framework.decorators import action, permission_classes
+from django.utils import timezone, timedelta
+from django_ratelimit.decorators import ratelimit, ratelimitkey
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
-
+from django.core.mail import send_mail
 from django.urls import reverse
 from .models import User
 from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer
@@ -24,6 +26,7 @@ class UserSignUp(generics.CreateAPIView):
 class UserSignIn(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
+    @ratelimit(key=ratelimitkey('ip', rate='10/h', method='POST', block=True))
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -33,7 +36,20 @@ class UserSignIn(generics.GenericAPIView):
 
         # Corrobora si las credenciales/datos son válidos
         if user is None or not user.check_password(serializer.validated_data['password']):
+            # Incrementar el contador de intentos fallidos de inicio de sesión
+            user.failed_login_attempts += 1
+            user.save()
+
+            # Si hay 10 o más intentos fallidos, bloquear el inicio de sesión
+            if user.failed_login_attempts >= 10:
+                user.is_active = False
+                user.save()
+
             return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Restablecer el contador de intentos fallidos si el inicio de sesión es exitoso
+        user.failed_login_attempts = 0
+        user.save()
         
         # Se genera un token de actualización para el usuario
         refresh = RefreshToken.for_user(user)
@@ -58,11 +74,63 @@ class ChangePasswordView(generics.GenericAPIView):
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-    
-class UserLogout(APIView):
-    permission_classes = [IsAuthenticated]
+class RequestPasswordResetView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        try:
+            user = User.objects.get(email_adress = email)
+            user.reset_password_token = uuid.uuid4()
+            user.reset_password_token_created_at = timezone.now()
+            user.save()
 
-    @csrf_exempt  # Proteccion contra CSRF (Cross-Site Request Forgery)
+            #Enviar correo al usuario
+            subject = 'Restablecimiento de contraseña.'
+            message = f'Haga clic en el siguiente enlace para restablecer su contraseña.'
+            from_email = 'gestion_noreply@gestion.com' #CAMBIAR CORREO
+            recipient_list = [user.email_address]
+            #Se envia el correo con los datos antes declarados
+            send_mail(subject, message, from_email, recipient_list)
+
+            return Response({'message': 'Se ha enviado un correo electrónico para restablecer la contraseña.'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'La dirección de correo electrónico no se encuentra registrada.'})
+
+@csrf_exempt
+class ResetPasswordView(APIView):
+    @ratelimit(key=ratelimitkey('ip', rate='3/h', method='POST', block=True))
+    def post(self, request):
+        reset_token = request.data.get('reset_token')
+        new_password = request.data.get('new_password')
+        try:
+            user = User.objects.get(reset_password_token = reset_token)
+
+            #Se verifica si el usuario esta activo
+            if not user.is_active:
+                return Response({'error': 'El usuario no se encuentra activo.'}, status=status.HTTP_400_BAD_REQUEST)
+            #Se verifica que el token de restablecimiento no haya expirado
+            if user.reset_password_token_created_at + timedelta(minutes = 30) < timezone.now():
+                return Response({'error': 'El token de restablecimiento de contraseña ha expirado o es inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            #Restablecimiento de contraseña y almacenamiento de la misma
+            user.set_password(new_password)
+            user.reset_password_token = uuid.uuid4()
+            user.reset_password_token_created_at = None
+            user.save()
+
+            # Enviar correo electrónico de confirmación al usuario
+            subject = 'Contraseña restablecida'
+            message = 'Su contraseña ha sido cambiada exitosamente.'
+            from_email = 'gestion_noreply@gestion.com' #CAMBIAR CORREO
+            recipient_list = [user.email_address]
+            send_mail(subject, message, from_email, recipient_list)
+
+            return Response({'message': 'La contraseña ha sido restablecida correctamente.'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'El token de restablecimiento es inválido.'}, status=status.HTTP_404_NOT_FOUND)
+
+@csrf_exempt   
+class UserLogout(APIView):
+    permission_classes = [IsAuthenticated]  # Proteccion contra CSRF (Cross-Site Request Forgery)
     def post(self, request):
         try:
             # Obtener el token de actualización del cuerpo de la solicitud
