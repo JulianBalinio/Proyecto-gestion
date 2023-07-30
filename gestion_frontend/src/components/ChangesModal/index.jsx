@@ -12,7 +12,6 @@ export default function ChangesModal({
 }) {
   const [producto, setProducto] = useState(defaultValues);
   const [options, setOptions] = useState([]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProducto((prevProducto) => {
@@ -22,21 +21,29 @@ export default function ChangesModal({
 
   const handleSave = () => {
     if (edit) {
+      const { category, ...payload } = producto;
       InventoryCalls.updateProduct({
         action: () => {
           fetchInventory();
           onClose();
         },
-        data: producto,
+        data: {
+          ...payload,
+          categoryId: category,
+        },
         productId: item.id,
       });
     } else {
+      const { category, ...payload } = producto;
       InventoryCalls.createProduct({
         action: () => {
           fetchInventory();
           onClose();
         },
-        data: producto,
+        data: {
+          ...payload,
+          categoryId: category,
+        },
       });
     }
   };
@@ -54,7 +61,7 @@ export default function ChangesModal({
   useEffect(() => {
     const initializeItem = () => {
       setProducto((prevProducto) => {
-        return { ...prevProducto, ...item };
+        return { ...prevProducto, ...item, category: item.category.id };
       });
     };
 

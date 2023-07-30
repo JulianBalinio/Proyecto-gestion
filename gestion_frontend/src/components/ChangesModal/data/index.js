@@ -1,5 +1,4 @@
 const defaultValues = {
-  id: "",
   code: "",
   name: "",
   stock: "",
@@ -8,7 +7,8 @@ const defaultValues = {
 };
 
 const validate = (obj) => {
-  return Object.values(obj).some((value) => value === "");
+  const { id, ...objWithoutId } = obj;
+  return Object.values(objWithoutId).some((value) => value === "");
 };
 
 const getFields = (producto, styles) => {

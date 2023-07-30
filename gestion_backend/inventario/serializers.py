@@ -3,24 +3,6 @@ from rest_framework import serializers
 from .models import Producto, Categoria
 
 
-class ProductoSerializer(serializers.ModelSerializer):
-    category = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Producto
-        fields = [
-            'id',
-            'name',
-            'code',
-            'stock',
-            'price',
-            'category',
-        ]
-
-    def get_category(self, obj):
-        return obj.category.name if obj.category else None
-
-
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria
@@ -31,3 +13,24 @@ class CategorySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'required': False}
         }
+
+
+class ProductoSerializer(serializers.ModelSerializer):
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Categoria.objects.all(),
+        source='category',
+        write_only=True
+    )
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Producto
+        fields = [
+            'id',
+            'name',
+            'code',
+            'stock',
+            'price',
+            'category_id',
+            'category',
+        ]
