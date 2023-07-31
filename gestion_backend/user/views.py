@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from django.utils import timezone, timedelta
-from django_ratelimit.decorators import ratelimit, ratelimitkey
+from django_ratelimit.decorators import ratelimit
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
@@ -26,7 +26,7 @@ class UserSignUp(generics.CreateAPIView):
 class UserSignIn(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
-    @ratelimit(key=ratelimitkey('ip', rate='10/h', method='POST', block=True))
+    @ratelimit(key='ip', rate='10/h', method='POST', block=True)
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -76,11 +76,11 @@ class ChangePasswordView(generics.GenericAPIView):
     
 class RequestPasswordResetView(APIView):
     def post(self, request):
-        email = request.data.get('email')
+        email = request.data.get('email') #Se obtiene correo del usuario
         try:
-            user = User.objects.get(email_adress = email)
-            user.reset_password_token = uuid.uuid4()
-            user.reset_password_token_created_at = timezone.now()
+            user = User.objects.get(email_adress = email) #Se busca el usuario que coincida con el correo en la base de datos
+            user.reset_password_token = uuid.uuid4() #Se genera el token de reseteo en caso de que se encuentre
+            user.reset_password_token_created_at = timezone.now() #Se guarda el momento de creacion del token
             user.save()
 
             #Enviar correo al usuario
@@ -97,12 +97,13 @@ class RequestPasswordResetView(APIView):
 
 @csrf_exempt
 class ResetPasswordView(APIView):
-    @ratelimit(key=ratelimitkey('ip', rate='3/h', method='POST', block=True))
+    @ratelimit(key='ip', rate='3/h', method='POST', block=True)
     def post(self, request):
+        #Se obtiene el token de reseteo y la contraseña
         reset_token = request.data.get('reset_token')
         new_password = request.data.get('new_password')
         try:
-            user = User.objects.get(reset_password_token = reset_token)
+            user = User.objects.get(reset_password_token = reset_token) #Se busca en la db el usuario que coincida con el token
 
             #Se verifica si el usuario esta activo
             if not user.is_active:
@@ -113,8 +114,8 @@ class ResetPasswordView(APIView):
             
             #Restablecimiento de contraseña y almacenamiento de la misma
             user.set_password(new_password)
-            user.reset_password_token = uuid.uuid4()
-            user.reset_password_token_created_at = None
+            user.reset_password_token = uuid.uuid4() #Se genera nuevo token de restablecimiento
+            user.reset_password_token_created_at = None #None, el token ya no es necesario
             user.save()
 
             # Enviar correo electrónico de confirmación al usuario
