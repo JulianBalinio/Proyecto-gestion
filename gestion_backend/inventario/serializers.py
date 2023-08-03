@@ -1,11 +1,11 @@
 # Serializadores para el front
 from rest_framework import serializers
-from .models import Producto, Categoria
+from .models import Product, Category
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Categoria
+        model = Category
         fields = [
             'id',
             'name',
@@ -17,14 +17,14 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductoSerializer(serializers.ModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(
-        queryset=Categoria.objects.all(),
+        queryset=Category.objects.all(),
         source='category',
         write_only=True
     )
     category = CategorySerializer(read_only=True)
 
     class Meta:
-        model = Producto
+        model = Product
         fields = [
             'id',
             'name',

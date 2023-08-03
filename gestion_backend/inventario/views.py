@@ -3,22 +3,22 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ViewSet
 from drf_yasg.utils import swagger_auto_schema
-from .models import Producto, Categoria
+from .models import Product, Category
 from .serializers import ProductoSerializer, CategorySerializer
 
 
 class ProductosViewSet(ViewSet):
     @swagger_auto_schema(operation_description="Obtener todos los productos.")
     def list(self, request):
-        productos = Producto.objects.all()
+        productos = Product.objects.all()
         serializer = ProductoSerializer(productos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(operation_description="Obtener un producto.")
     def retrieve(self, request, pk=None):
         try:
-            producto = Producto.objects.get(pk=pk)
-        except Producto.DoesNotExist:
+            producto = Product.objects.get(pk=pk)
+        except Product.DoesNotExist:
             return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = ProductoSerializer(instance=producto)
@@ -37,8 +37,8 @@ class ProductosViewSet(ViewSet):
     @swagger_auto_schema(request_body=ProductoSerializer)
     def update(self, request, pk=None):
         try:
-            producto = Producto.objects.get(pk=pk)
-        except Producto.DoesNotExist:
+            producto = Product.objects.get(pk=pk)
+        except Product.DoesNotExist:
             return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = ProductoSerializer(producto, data=request.data)
@@ -50,8 +50,8 @@ class ProductosViewSet(ViewSet):
     @swagger_auto_schema(operation_description="Borrar producto en base a su ID.")
     def destroy(self, request, pk=None):
         try:
-            producto = Producto.objects.get(pk=pk)
-        except Producto.DoesNotExist:
+            producto = Product.objects.get(pk=pk)
+        except Product.DoesNotExist:
             return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
         producto.delete()
@@ -61,7 +61,7 @@ class ProductosViewSet(ViewSet):
 class CategoryViewSet(ViewSet):
     @swagger_auto_schema(operation_description="Obtener todas las categorías.")
     def list(self, request):
-        categories = Categoria.objects.all()
+        categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

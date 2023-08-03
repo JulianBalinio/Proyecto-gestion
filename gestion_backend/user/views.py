@@ -1,15 +1,16 @@
 import uuid
+from datetime import timedelta
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
-from django.utils import timezone, timedelta
+from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
-from django.urls import reverse
 from .models import User
 from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer
 
@@ -26,7 +27,7 @@ class UserSignUp(generics.CreateAPIView):
 class UserSignIn(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
-    @ratelimit(key='ip', rate='10/h', method='POST', block=True)
+    @method_decorator (ratelimit(key='ip', rate='10/h', method=['POST'], block=True))
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -110,7 +111,7 @@ class ResetPasswordView(APIView):
                 return Response({'error': 'El usuario no se encuentra activo.'}, status=status.HTTP_400_BAD_REQUEST)
             #Se verifica que el token de restablecimiento no haya expirado
             if user.reset_password_token_created_at + timedelta(minutes = 30) < timezone.now():
-                return Response({'error': 'El token de restablecimiento de contraseña ha expirado o es inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'El token de restablecimiento de contraseña ha expirado.'}, status=status.HTTP_400_BAD_REQUEST)
             
             #Restablecimiento de contraseña y almacenamiento de la misma
             user.set_password(new_password)
@@ -129,21 +130,20 @@ class ResetPasswordView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'El token de restablecimiento es inválido.'}, status=status.HTTP_404_NOT_FOUND)
 
-@csrf_exempt   
+@csrf_exempt  # Proteccion contra CSRF (Cross-Site Request Forgery)
 class UserLogout(APIView):
-    permission_classes = [IsAuthenticated]  # Proteccion contra CSRF (Cross-Site Request Forgery)
+    permission_classes = [IsAuthenticated]  #Solo los usuarios autenticados pueden entrar a esta APIView
     def post(self, request):
         try:
-            # Obtener el token de actualización del cuerpo de la solicitud
+            # Obtener el token de actualización
             refresh_token = request.data.get('refresh_token')
             if not refresh_token:
                 return Response({'error': 'Falta el token de actualización.'}, status=status.HTTP_400_BAD_REQUEST)
             # Revocar el token de actualización y acceso
-            refresh = RefreshToken(refresh_token)
-            refresh.blacklist()
+            refresh = RefreshToken(refresh_token) 
+            refresh.blacklist() #Se revoca token de acceso. Cierra la sesion y no se puede utilizar para solicitudes protegidas
             # Redirigir a la página de inicio de sesión después del cierre de sesión exitoso
-            redirect_url = reverse('sign_in')
-            return Response({'detail': 'Cierre de sesión exitoso.', 'redirect_to': redirect_url}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'detail': 'Cierre de sesión exitoso.'}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'error': 'Error al cerrar la sesión.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

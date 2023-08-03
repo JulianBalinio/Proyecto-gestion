@@ -1,5 +1,5 @@
 from django.db import models
-from inventario.models import Producto
+from inventario.models import Product
 from user.models import User
 
 class Order(models.Model):
@@ -11,5 +11,6 @@ class Order(models.Model):
 
 class OrderDetails(models.Model):
     order = models.ForeignKey(to=Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(to=Producto, on_delete=models.CASCADE)
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=0)
+
