@@ -9,10 +9,11 @@ export const LoginService = {
     );
     return result;
   },
-  signUp: async (params) => {
+  signUp: async (data) => {
     const result = await Api.fetch(
       "http://127.0.0.1:8000/user/sign_up/",
-      "GET"
+      "POST",
+      data
     );
     return result;
   },
