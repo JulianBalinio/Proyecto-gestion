@@ -1,26 +1,41 @@
 from django.db import models
 from user.models import User
 
-# El modelo Category representa las categorías a las que pueden pertenecer los productos
-
 
 class Category(models.Model):
-    name = models.CharField(max_length=30, null=False, blank=False)
+    name = models.CharField(max_length=20, null=False, blank=False)
 
     def __str__(self):
         return self.name
 
 
-# El modelo Product representa los productos en tu sistema.
+class Brands(models.Model):
+    name = models.CharField(max_length=20, null=False, blank=False)
+
+    def __str__(self):
+        return self.name
+
+
+class Suppliers(models.Model):
+    name = models.CharField(max_length=20, null=False, blank=False)
+    address = models.CharField(max_length=30)
+    phone = models.CharField(max_length=20)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return self.name
 
 
 class Product(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
-    code = models.CharField(max_length=20, null=False, blank=False)
+    code = models.CharField(max_length=20)
     stock = models.PositiveIntegerField(default=0)
     price = models.DecimalField(
         max_digits=6, decimal_places=2, null=False, blank=False)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(
+        to=Suppliers, on_delete=models.CASCADE, null=True)
+    brand = models.ForeignKey(to=Brands, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name

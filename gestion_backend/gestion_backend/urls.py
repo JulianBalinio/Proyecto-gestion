@@ -19,7 +19,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('api/', include('inventario.urls', namespace='inventario')),
+    path('inventario/', include('inventario.urls')),
     path('user/', include('user.urls')),
     path('ventas/', include('ventas.urls'))
 ]
