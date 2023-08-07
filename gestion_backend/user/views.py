@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -19,8 +19,6 @@ from .validators import send_code_email, validate_code
 class UserSignUp(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-    
 
     def perform_create(self, serializer):
         raw_password = self.request.data.get('password')

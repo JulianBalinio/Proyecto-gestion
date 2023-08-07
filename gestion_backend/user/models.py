@@ -35,6 +35,8 @@ class User(models.Model):
 
     password = models.CharField(max_length=32)
 
+    failed_login_attempts = models.IntegerField(default=0)
+
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
 

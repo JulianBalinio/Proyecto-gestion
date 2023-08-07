@@ -1,13 +1,19 @@
+import { AuthProvider } from "./services/AuthContext";
 import { Route, Routes } from "react-router-dom";
-import routes from "./routes/index";
+import ProtectedRoute from "./services/ProtectedRoute";
+import Login from "./modules/Login/pages/Login";
+import Inventario from "./modules/Inventario/pages/Inventario";
 
 function App() {
   return (
-    <Routes>
-      {routes.map((route, index) => {
-        return <Route key={index} path={route.path} element={route.element} />;
-      })}
-    </Routes>
+    <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedRoute />}>
+            <Route path="/" element={<Inventario />} />
+          </Route>
+        </Routes>
+    </AuthProvider>
   );
 }
 
