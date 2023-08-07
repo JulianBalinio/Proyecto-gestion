@@ -35,9 +35,12 @@ class User(models.Model):
 
     password = models.CharField(max_length=32)
 
-    is_active = models.BooleanField(default = True)
+    is_active = models.BooleanField(default=True)
+    is_verified = models.BooleanField(default=False)
 
-    #Campo de token para restablecimiento de contraseña
+    register_code = models.CharField(max_length=6, blank=True, null=True)
+    register_code_created_at = models.DateTimeField(blank=True, null=True)
+
     reset_password_token = models.UUIDField(default=uuid.uuid4, editable=False)
     reset_password_token_created_at = models.DateTimeField(null=True, blank=True)
 
