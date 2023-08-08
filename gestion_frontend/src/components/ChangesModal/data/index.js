@@ -4,51 +4,66 @@ const defaultValues = {
   stock: "",
   price: "",
   category: "",
+  brand: "",
+  supplier: "",
 };
 
-const validate = (obj) => {
-  const { id, ...objWithoutId } = obj;
-  return Object.values(objWithoutId).some((value) => value === "");
+const validate = (fields) => {
+  return fields.some((field) => field.required && field.value === "");
 };
 
-const getFields = (producto, styles) => {
+const getFields = (product, options, styles) => {
   return [
     {
       label: "Código",
       type: "number",
       name: "code",
-      value: producto.code,
+      value: product.code,
       required: true,
       autoFocus: true,
       className: styles.inputCode,
     },
     {
       label: "Categoría",
-      placeholder: "Categoria",
       required: true,
       select: true,
+      options: options.categories,
       name: "category",
-      value: producto.category,
+      value: product.category,
+    },
+    {
+      label: "Marca",
+      select: true,
+      name: "brand",
+      options: options.brands,
+      value: product.brand,
+    },
+    {
+      label: "Proveedor",
+      select: true,
+      name: "supplier",
+      options: options.suppliers,
+      value: product.supplier,
     },
     {
       label: "Nombre",
       name: "name",
       required: true,
-      value: producto.name,
+      value: product.name,
     },
     {
       label: "Stock",
       type: "number",
       name: "stock",
       required: true,
-      value: producto.stock,
+      value: product.stock,
     },
     {
       label: "Precio",
       type: "number",
       name: "price",
       required: true,
-      value: producto.price,
+      value: product.price,
     },
   ];
 };

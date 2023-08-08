@@ -17,7 +17,7 @@ export default function ChangesModalTemplate({
   handleDelete,
   handleSave,
 }) {
-  const fields = getFields(producto, styles);
+  const fields = getFields(producto, options, styles);
   return (
     <Drawer
       anchor="right"
@@ -51,7 +51,7 @@ export default function ChangesModalTemplate({
                   onChange={(e) => handleChange(e)}
                 >
                   {field.select &&
-                    options.map((option, key) => {
+                    field.options.map((option, key) => {
                       return (
                         <MenuItem key={key} value={option.id}>
                           {option.name}
@@ -83,7 +83,7 @@ export default function ChangesModalTemplate({
               onClick={handleSave}
               sx={{ margin: 2 }}
               variant="contained"
-              disabled={validate(producto)}
+              disabled={validate(fields)}
             >
               {edit ? "Actualizar" : "Guardar"}
             </Button>

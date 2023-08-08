@@ -12,6 +12,11 @@ const InventoryCalls = {
       .then((data) => action(data))
       .catch((err) => console.error(err));
   },
+  getOptions: ({ action, params = {} }) => {
+    InventoryService.getOptions(params)
+      .then((data) => action(data))
+      .catch((err) => console.error(err));
+  },
   createCategory: ({ action, data }) => {
     InventoryService.createCategory(data)
       .then((data) => action(data))

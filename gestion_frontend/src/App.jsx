@@ -3,16 +3,18 @@ import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./services/ProtectedRoute";
 import Login from "./modules/Login/pages/Login";
 import Inventario from "./modules/Inventario/pages/Inventario";
+import Ventas from "./modules/Ventas/pages/Ventas";
 
 function App() {
   return (
     <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<ProtectedRoute />}>
-            <Route path="/" element={<Inventario />} />
-          </Route>
-        </Routes>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="/" element={<Inventario />} />
+          <Route path="/ventas" element={<Ventas />} />
+        </Route>
+      </Routes>
     </AuthProvider>
   );
 }

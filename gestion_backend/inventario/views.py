@@ -1,10 +1,11 @@
+# from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ViewSet
+from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
-from .models import Product, Category
-from .serializers import ProductoSerializer, CategorySerializer
+from .models import Product, Category, Suppliers, Brands
+from .serializers import ProductoSerializer, CategorySerializer, BrandSerializer, SupplierSerializer
 
 
 class ProductosViewSet(ViewSet):
@@ -23,6 +24,25 @@ class ProductosViewSet(ViewSet):
 
         serializer = ProductoSerializer(instance=producto)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(operation_description="Obtener opciones para agregar/editar productos.")
+    @action(detail=False, methods=["GET"])
+    def options(self, request):
+        categories = Category.objects.all()
+        suppliers = Suppliers.objects.all()
+        brands = Brands.objects.all()
+
+        category_serializer = CategorySerializer(categories, many=True)
+        suppliers_serializer = SupplierSerializer(suppliers, many=True)
+        brands_serializer = BrandSerializer(brands, many=True)
+
+        options_data = {
+            'categories': category_serializer.data,
+            'suppliers': suppliers_serializer.data,
+            'brands': brands_serializer.data,
+        }
+
+        return Response(options_data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(request_body=ProductoSerializer)
     def create(self, request):

@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { InventoryCalls } from "/src/modules/Inventario/utils/apiCalls";
-import Header from "/src/components/Header";
-import Heading from "/src/components/Heading";
-import SearchBar from "/src/components/SearchBar";
-import DataTable from "/src/components/DataTable";
-import styles from "./index.module.scss";
+import VentasTemplate from "../../templates";
 
 const Ventas = () => {
   const [search, setSearch] = useState("");
@@ -12,6 +8,7 @@ const Ventas = () => {
 
   const handleSearch = (e) => {
     const { value } = e.target;
+    setSearch(value);
   };
 
   const fetchInventory = () => {
@@ -23,22 +20,12 @@ const Ventas = () => {
   }, []);
 
   return (
-    <>
-      <Header />
-      <main className={styles.main}>
-        <Heading title={"Ventas"} />
-
-        <SearchBar value={search} onChange={handleSearch} />
-
-        <section className={styles.dataTable}>
-          <DataTable
-            searchTerm={search}
-            rows={rows}
-            fetchInventory={fetchInventory}
-          />
-        </section>
-      </main>
-    </>
+    <VentasTemplate
+      search={search}
+      handleSearch={handleSearch}
+      rows={rows}
+      fetchInventory={fetchInventory}
+    />
   );
 };
 

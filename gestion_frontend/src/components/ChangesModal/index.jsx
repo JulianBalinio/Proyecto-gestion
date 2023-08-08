@@ -11,7 +11,12 @@ export default function ChangesModal({
   fetchInventory,
 }) {
   const [producto, setProducto] = useState(defaultValues);
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState({
+    brands: [],
+    categories: [],
+    suppliers: [],
+  });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProducto((prevProducto) => {
@@ -69,7 +74,7 @@ export default function ChangesModal({
   }, [item]);
 
   useEffect(() => {
-    InventoryCalls.getCategories({ action: setOptions });
+    InventoryCalls.getOptions({ action: setOptions });
   }, []);
 
   return (
