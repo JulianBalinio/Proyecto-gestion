@@ -10,10 +10,11 @@ from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
-from drf_yasg.utils import swagger_auto_schema
 from django.core.mail import send_mail
+from django.core.exceptions import ValidationError
 from .models import User
-from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer, PasswordRequest
+from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer
+from .validators import send_code_email, validate_code
 
 class UserSignUp(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -21,9 +22,38 @@ class UserSignUp(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         raw_password = self.request.data.get('password')
-        # Se encripta la contraseña
+        # Se encripta la contraseñaser
         serializer.validated_data['password'] = make_password(raw_password)
         super().perform_create(serializer)
+
+        #Se guarda el objeto del usuario sin completar el registro sin agregarlo a la bd
+        user = serializer.save(commit=False)
+
+        #Enviar codigo de validacion por correo (validatos.py)
+        send_code_email(
+            user, 'Código de autenticación de registro',
+            'Tu código de autenticación es: {}. Utilízalo para completar el registro.',
+            'register_code', 'register_code_created_at'
+            )
+        return Response({'message': 'Se ha enviado un código de verificación. Por favor, revisa tu correo electrónico.'}, status=status.HTTP_201_CREATED)
+
+    def verify_registration_code(self, request, *args, **kwargs):
+        user_id = kwargs.get('pk')
+        code = request.data.get('code')
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            validate_code(user, code, 'autenticación de registro', 'register_code', 'register_code_created_at')
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.is_verified = True  # Marcar el registro como verificado
+        user.save()
+
+        return Response({'message': 'Registro completado exitosamente.'}, status=status.HTTP_200_OK)    
 
 class UserSignIn(generics.GenericAPIView):
     serializer_class = LoginSerializer
@@ -35,23 +65,20 @@ class UserSignIn(generics.GenericAPIView):
 
         # Se busca al usuario en base al correo
         user = User.objects.filter(email_address=serializer.validated_data['email_address']).first()
-        if user is None:
-            return Response({'error': 'El usuario no existe.'}, status=status.HTTP_404_NOT_FOUND)
-
         # Corrobora si las credenciales/datos son válidos
-        if user is not None and not user.check_password(serializer.validated_data['password']):
+        if user is None or not user.check_password(serializer.validated_data['password']):
             # Incrementar el contador de intentos fallidos de inicio de sesión
             user.failed_login_attempts += 1
             user.save()
-
             # Si hay 10 o más intentos fallidos, bloquear el inicio de sesión
             if user.failed_login_attempts >= 10:
                 user.is_active = False
                 user.save()
 
-            return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+            return Response({'error': 'Credenciales inválidas.'}, status=status.HTTP_401_UNAUTHORIZED)
+                
         # Restablecer el contador de intentos fallidos si el inicio de sesión es exitoso
+        user.is_active = True
         user.failed_login_attempts = 0
         user.save()
         
@@ -79,11 +106,11 @@ class ChangePasswordView(generics.GenericAPIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
 class RequestPasswordResetView(APIView):
-    @swagger_auto_schema(request_body=PasswordRequest)
     def post(self, request):
-        email = request.data.get('email_address') #Se obtiene correo del usuario
+        email = request.data.get('email') #Se obtiene correo del usuario
+        
         try:
-            user = User.objects.get(email_address = email) #Se busca el usuario que coincida con el correo en la base de datos
+            user = User.objects.get(email_adress = email) #Se busca el usuario que coincida con el correo en la base de datos
             user.reset_password_token = uuid.uuid4() #Se genera el token de reseteo en caso de que se encuentre
             user.reset_password_token_created_at = timezone.now() #Se guarda el momento de creacion del token
             user.save()
@@ -91,7 +118,7 @@ class RequestPasswordResetView(APIView):
             #Enviar correo al usuario
             subject = 'Restablecimiento de contraseña.'
             message = f'Haga clic en el siguiente enlace para restablecer su contraseña.'
-            from_email = 'matisgba@gmail.com' #CAMBIAR CORREO
+            from_email = 'gestion_noreply@gestion.com' #CAMBIAR CORREO
             recipient_list = [user.email_address]
             #Se envia el correo con los datos antes declarados
             send_mail(subject, message, from_email, recipient_list)
@@ -102,7 +129,7 @@ class RequestPasswordResetView(APIView):
 
 @csrf_exempt
 class ResetPasswordView(APIView):
-    @method_decorator (ratelimit(key='ip', rate='3/h', method='POST', block=True))
+    @ratelimit(key='ip', rate='3/h', method='POST', block=True)
     def post(self, request):
         #Se obtiene el token de reseteo y la contraseña
         reset_token = request.data.get('reset_token')

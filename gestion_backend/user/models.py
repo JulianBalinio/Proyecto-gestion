@@ -6,6 +6,7 @@ from user.validators import name_validator, phone_validator
 
 
 class User(models.Model):
+
     first_name = models.CharField(
         max_length=50,
         null=False,
@@ -33,10 +34,15 @@ class User(models.Model):
     )
 
     password = models.CharField(max_length=32)
-    failed_login_attempts = models.IntegerField(default=0) # REVISAR TIPO DE DATO DEL ATRIBUTO
-    is_active = models.BooleanField(default = True)
 
-    #Campo de token para restablecimiento de contraseña
+    failed_login_attempts = models.IntegerField(default=0)
+
+    is_active = models.BooleanField(default=True)
+    is_verified = models.BooleanField(default=False)
+
+    register_code = models.CharField(max_length=6, blank=True, null=True)
+    register_code_created_at = models.DateTimeField(blank=True, null=True)
+
     reset_password_token = models.UUIDField(default=uuid.uuid4, editable=False)
     reset_password_token_created_at = models.DateTimeField(null=True, blank=True)
 

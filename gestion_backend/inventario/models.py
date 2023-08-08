@@ -61,6 +61,7 @@ class ProductInventory(models.Model):
         on_delete=models.CASCADE
     )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    
     quantity = models.PositiveIntegerField(default=0)
 
     def __str__(self):
