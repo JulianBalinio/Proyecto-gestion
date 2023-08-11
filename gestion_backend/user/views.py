@@ -110,7 +110,12 @@ class RequestPasswordResetView(APIView):
         email = request.data.get('email') #Se obtiene correo del usuario
         
         try:
-            user = User.objects.get(email_adress = email) #Se busca el usuario que coincida con el correo en la base de datos
+            user = User.objects.get(email_address = email) #Se busca el usuario que coincida con el correo en la base de datos
+
+            #Se busca si el usuario esta verificado
+            if not user.is_verified:
+                return Response({'error': 'La dirección de correo electrónico no se encuentra verificada.'}, status=status.HTTP_400_BAD_REQUEST)
+            
             user.reset_password_token = uuid.uuid4() #Se genera el token de reseteo en caso de que se encuentre
             user.reset_password_token_created_at = timezone.now() #Se guarda el momento de creacion del token
             user.save()
@@ -136,6 +141,8 @@ class ResetPasswordView(APIView):
         new_password = request.data.get('new_password')
         try:
             user = User.objects.get(reset_password_token = reset_token) #Se busca en la db el usuario que coincida con el token
+
+            ##Cambiar a generar link
 
             #Se verifica si el usuario esta activo
             if not user.is_active:
