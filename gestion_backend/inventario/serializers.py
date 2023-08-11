@@ -54,4 +54,5 @@ class ProductoSerializer(serializers.ModelSerializer):
             'price',
             'category_id',
             'category',
+            'last_edit_date'
         ]

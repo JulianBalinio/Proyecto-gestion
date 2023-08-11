@@ -33,6 +33,7 @@ class Product(models.Model):
     price = models.DecimalField(
         max_digits=6, decimal_places=2, null=False, blank=False)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
+    last_edit_date = models.DateTimeField(blank=True, null=True)
     supplier = models.ForeignKey(
         to=Suppliers, on_delete=models.CASCADE, null=True)
     brand = models.ForeignKey(to=Brands, on_delete=models.CASCADE, null=True)
@@ -61,7 +62,7 @@ class ProductInventory(models.Model):
         on_delete=models.CASCADE
     )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    
+
     quantity = models.PositiveIntegerField(default=0)
 
     def __str__(self):

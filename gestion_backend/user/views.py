@@ -16,6 +16,7 @@ from .models import User
 from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer
 from .validators import send_code_email, validate_code
 
+
 class UserSignUp(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -26,15 +27,15 @@ class UserSignUp(generics.CreateAPIView):
         serializer.validated_data['password'] = make_password(raw_password)
         super().perform_create(serializer)
 
-        #Se guarda el objeto del usuario sin completar el registro sin agregarlo a la bd
+        # Se guarda el objeto del usuario sin completar el registro sin agregarlo a la bd
         user = serializer.save(commit=False)
 
-        #Enviar codigo de validacion por correo (validatos.py)
+        # Enviar codigo de validacion por correo (validatos.py)
         send_code_email(
             user, 'Código de autenticación de registro',
             'Tu código de autenticación es: {}. Utilízalo para completar el registro.',
             'register_code', 'register_code_created_at'
-            )
+        )
         return Response({'message': 'Se ha enviado un código de verificación. Por favor, revisa tu correo electrónico.'}, status=status.HTTP_201_CREATED)
 
     def verify_registration_code(self, request, *args, **kwargs):
@@ -46,27 +47,34 @@ class UserSignUp(generics.CreateAPIView):
         except User.DoesNotExist:
             return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
         try:
-            validate_code(user, code, 'autenticación de registro', 'register_code', 'register_code_created_at')
+            validate_code(user, code, 'autenticación de registro',
+                          'register_code', 'register_code_created_at')
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         user.is_verified = True  # Marcar el registro como verificado
         user.save()
 
-        return Response({'message': 'Registro completado exitosamente.'}, status=status.HTTP_200_OK)    
+        return Response({'message': 'Registro completado exitosamente.'}, status=status.HTTP_200_OK)
+
 
 class UserSignIn(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
-    @method_decorator (ratelimit(key='ip', rate='10/h', method=['POST'], block=True))
+    @method_decorator(ratelimit(key='ip', rate='10/h', method=['POST'], block=True))
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         # Se busca al usuario en base al correo
-        user = User.objects.filter(email_address=serializer.validated_data['email_address']).first()
+        user = User.objects.filter(
+            email_address=serializer.validated_data['email_address']).first()
+
+        if user is None:
+            return Response({'error': 'El usuario no existe.'}, status=status.HTTP_404_NOT_FOUND)
+
         # Corrobora si las credenciales/datos son válidos
-        if user is None or not user.check_password(serializer.validated_data['password']):
+        if user is not None and not user.check_password(serializer.validated_data['password']):
             # Incrementar el contador de intentos fallidos de inicio de sesión
             user.failed_login_attempts += 1
             user.save()
@@ -76,12 +84,12 @@ class UserSignIn(generics.GenericAPIView):
                 user.save()
 
             return Response({'error': 'Credenciales inválidas.'}, status=status.HTTP_401_UNAUTHORIZED)
-                
+
         # Restablecer el contador de intentos fallidos si el inicio de sesión es exitoso
         user.is_active = True
         user.failed_login_attempts = 0
         user.save()
-        
+
         # Se genera un token de actualización para el usuario
         refresh = RefreshToken.for_user(user)
         refresh_token = str(refresh)
@@ -90,9 +98,11 @@ class UserSignIn(generics.GenericAPIView):
         # El token de acceso se devuelve como respuesta
         return Response({'access_token': access_token, 'refresh_token': refresh_token}, status=status.HTTP_200_OK)
 
+
 class ChangePasswordView(generics.GenericAPIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -100,67 +110,75 @@ class ChangePasswordView(generics.GenericAPIView):
         user = request.user
         try:
             # Cambiar la contraseña del usuario
-            user.change_password(serializer.validated_data['current_password'], serializer.validated_data['new_password'])
+            user.change_password(
+                serializer.validated_data['current_password'], serializer.validated_data['new_password'])
             return Response({'detail': 'Contraseña cambiada exitosamente.'}, status=status.HTTP_200_OK)
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 class RequestPasswordResetView(APIView):
     def post(self, request):
-        email = request.data.get('email') #Se obtiene correo del usuario
-        
-        try:
-            user = User.objects.get(email_address = email) #Se busca el usuario que coincida con el correo en la base de datos
+        email = request.data.get('email')  # Se obtiene correo del usuario
 
-            #Se busca si el usuario esta verificado
+        try:
+            # Se busca el usuario que coincida con el correo en la base de datos
+            user = User.objects.get(email_address=email)
+
+            # Se busca si el usuario esta verificado
             if not user.is_verified:
                 return Response({'error': 'La dirección de correo electrónico no se encuentra verificada.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-            user.reset_password_token = uuid.uuid4() #Se genera el token de reseteo en caso de que se encuentre
-            user.reset_password_token_created_at = timezone.now() #Se guarda el momento de creacion del token
+
+            # Se genera el token de reseteo en caso de que se encuentre
+            user.reset_password_token = uuid.uuid4()
+            # Se guarda el momento de creacion del token
+            user.reset_password_token_created_at = timezone.now()
             user.save()
 
-            #Enviar correo al usuario
+            # Enviar correo al usuario
             subject = 'Restablecimiento de contraseña.'
             message = f'Haga clic en el siguiente enlace para restablecer su contraseña.'
-            from_email = 'gestion_noreply@gestion.com' #CAMBIAR CORREO
+            from_email = 'gestion_noreply@gestion.com'  # CAMBIAR CORREO
             recipient_list = [user.email_address]
-            #Se envia el correo con los datos antes declarados
+            # Se envia el correo con los datos antes declarados
             send_mail(subject, message, from_email, recipient_list)
 
             return Response({'message': 'Se ha enviado un correo electrónico para restablecer la contraseña.'}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'error': 'La dirección de correo electrónico no se encuentra registrada.'})
 
+
 @csrf_exempt
 class ResetPasswordView(APIView):
     @ratelimit(key='ip', rate='3/h', method='POST', block=True)
     def post(self, request):
-        #Se obtiene el token de reseteo y la contraseña
+        # Se obtiene el token de reseteo y la contraseña
         reset_token = request.data.get('reset_token')
         new_password = request.data.get('new_password')
         try:
-            user = User.objects.get(reset_password_token = reset_token) #Se busca en la db el usuario que coincida con el token
+            # Se busca en la db el usuario que coincida con el token
+            user = User.objects.get(reset_password_token=reset_token)
 
-            ##Cambiar a generar link
+            # Cambiar a generar link
 
-            #Se verifica si el usuario esta activo
+            # Se verifica si el usuario esta activo
             if not user.is_active:
                 return Response({'error': 'El usuario no se encuentra activo.'}, status=status.HTTP_400_BAD_REQUEST)
-            #Se verifica que el token de restablecimiento no haya expirado
-            if user.reset_password_token_created_at + timedelta(minutes = 30) < timezone.now():
+            # Se verifica que el token de restablecimiento no haya expirado
+            if user.reset_password_token_created_at + timedelta(minutes=30) < timezone.now():
                 return Response({'error': 'El token de restablecimiento de contraseña ha expirado.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-            #Restablecimiento de contraseña y almacenamiento de la misma
+
+            # Restablecimiento de contraseña y almacenamiento de la misma
             user.set_password(new_password)
-            user.reset_password_token = uuid.uuid4() #Se genera nuevo token de restablecimiento
-            user.reset_password_token_created_at = None #None, el token ya no es necesario
+            # Se genera nuevo token de restablecimiento
+            user.reset_password_token = uuid.uuid4()
+            user.reset_password_token_created_at = None  # None, el token ya no es necesario
             user.save()
 
             # Enviar correo electrónico de confirmación al usuario
             subject = 'Contraseña restablecida'
             message = 'Su contraseña ha sido cambiada exitosamente.'
-            from_email = 'gestion_noreply@gestion.com' #CAMBIAR CORREO
+            from_email = 'gestion_noreply@gestion.com'  # CAMBIAR CORREO
             recipient_list = [user.email_address]
             send_mail(subject, message, from_email, recipient_list)
 
@@ -168,9 +186,12 @@ class ResetPasswordView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'El token de restablecimiento es inválido.'}, status=status.HTTP_404_NOT_FOUND)
 
+
 @csrf_exempt  # Proteccion contra CSRF (Cross-Site Request Forgery)
 class UserLogout(APIView):
-    permission_classes = [IsAuthenticated]  #Solo los usuarios autenticados pueden entrar a esta APIView
+    # Solo los usuarios autenticados pueden entrar a esta APIView
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             # Obtener el token de actualización
@@ -178,10 +199,10 @@ class UserLogout(APIView):
             if not refresh_token:
                 return Response({'error': 'Falta el token de actualización.'}, status=status.HTTP_400_BAD_REQUEST)
             # Revocar el token de actualización y acceso
-            refresh = RefreshToken(refresh_token) 
-            refresh.blacklist() #Se revoca token de acceso. Cierra la sesion y no se puede utilizar para solicitudes protegidas
+            refresh = RefreshToken(refresh_token)
+            # Se revoca token de acceso. Cierra la sesion y no se puede utilizar para solicitudes protegidas
+            refresh.blacklist()
             # Redirigir a la página de inicio de sesión después del cierre de sesión exitoso
             return Response({'detail': 'Cierre de sesión exitoso.'}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'error': 'Error al cerrar la sesión.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
