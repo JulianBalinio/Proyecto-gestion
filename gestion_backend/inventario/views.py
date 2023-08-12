@@ -94,3 +94,39 @@ class CategoryViewSet(ViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BrandViewSet(ViewSet):
+    @swagger_auto_schema(operation_description="Obtener todas las marcas")
+    def list(self, request):
+        brands = Brands.objects.all()
+        serializer = BrandSerializer(brands, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(request_body=BrandSerializer)
+    def create(self, request):
+        brand = request.data
+        serializer = BrandSerializer(data=brand)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SupplierViewSet(ViewSet):
+    @swagger_auto_schema(operation_description="Obtener todas los proveedores")
+    def list(self, request):
+        suppliers = Suppliers.objects.all()
+        serializer = BrandSerializer(suppliers, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(request_body=SupplierSerializer)
+    def create(self, request):
+        supplier = request.data
+        serializer = SupplierSerializer(data=supplier)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

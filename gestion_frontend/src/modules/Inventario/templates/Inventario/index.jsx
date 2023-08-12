@@ -5,7 +5,6 @@ import SearchBar from "/src/components/SearchBar";
 import DataTable from "/src/components/DataTable";
 import Heading from "/src/components/Heading";
 import ChangesModal from "/src/components/ChangesModal";
-import CategoryModal from "/src/components/CategoryModal";
 import PricesModal from "/src/components/PricesModal";
 import styles from "./index.module.scss";
 
@@ -17,7 +16,6 @@ const InventarioTemplate = ({
   fetchInventory,
   buttons,
   changesModalObject,
-  categoryModalObject,
   pricesModalObject,
 }) => {
   return (
@@ -57,7 +55,6 @@ const InventarioTemplate = ({
         </section>
 
         {openModal.add && <ChangesModal {...changesModalObject} />}
-        {openModal.category && <CategoryModal {...categoryModalObject} />}
         {openModal.prices && <PricesModal {...pricesModalObject} />}
       </main>
     </>

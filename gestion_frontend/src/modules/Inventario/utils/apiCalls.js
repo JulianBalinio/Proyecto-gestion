@@ -22,6 +22,16 @@ const InventoryCalls = {
       .then((data) => action(data))
       .catch((err) => console.error(err));
   },
+  createBrand: ({ action, data }) => {
+    InventoryService.createBrand(data)
+      .then((data) => action(data))
+      .catch((err) => console.error(err));
+  },
+  createSupplier: ({ action, data }) => {
+    InventoryService.createSupplier(data)
+      .then((data) => action(data))
+      .catch((err) => console.error(err));
+  },
   createProduct: ({ action, data }) => {
     InventoryService.createProduct(convertKeysSnakeToCamel(data))
       .then((data) => action(data))

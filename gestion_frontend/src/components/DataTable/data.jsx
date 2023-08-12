@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 
+//CAMELIZAR PRODUCTOS
 export const getColumns = ({ setItemToEdit, setOpen }) => {
   const columns = [
     { field: "id", headerName: "ID", flex: 2 },
@@ -10,7 +11,23 @@ export const getColumns = ({ setItemToEdit, setOpen }) => {
       headerName: "Categoría",
       flex: 4,
       renderCell: (params) => {
-        return `${params.value.name}`;
+        return `${params.row?.category_label || "-"}`;
+      },
+    },
+    {
+      field: "brand",
+      headerName: "Marca",
+      flex: 4,
+      renderCell: (params) => {
+        return `${params.row?.brand_label || "-"}`;
+      },
+    },
+    {
+      field: "supplier",
+      headerName: "Proveedor",
+      flex: 4,
+      renderCell: (params) => {
+        return `${params.row?.supplier_label || "-"}`;
       },
     },
     {

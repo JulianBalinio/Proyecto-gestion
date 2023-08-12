@@ -23,12 +23,6 @@ const Inventario = () => {
     fetchInventory,
   });
 
-  const categoryModalObject = getModalObject({
-    open: openModal,
-    action: setOpenModal,
-    key: "category",
-  });
-
   const pricesModalObject = getModalObject({
     open: openModal,
     action: setOpenModal,
@@ -49,7 +43,6 @@ const Inventario = () => {
       rows={rows}
       buttons={buttons}
       changesModalObject={changesModalObject}
-      categoryModalObject={categoryModalObject}
       pricesModalObject={pricesModalObject}
       fetchInventory={fetchInventory}
     />

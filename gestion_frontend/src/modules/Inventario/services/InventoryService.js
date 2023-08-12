@@ -17,32 +17,48 @@ export const InventoryService = {
   },
   getOptions: async (params) => {
     const result = await Api.fetch(
-      "http://127.0.0.1:8000/inventario/productos/options",
+      "http://127.0.0.1:8000/inventario/productos/options/",
       "GET"
     );
     return result;
   },
-  createCategory: async (data) => {
+  createCategory: async (payload) => {
     const result = await Api.fetch(
       "http://127.0.0.1:8000/inventario/categories/",
       "POST",
-      data
+      payload
     );
     return result;
   },
-  createProduct: async (data) => {
+  createBrand: async (payload) => {
+    const result = await Api.fetch(
+      "http://127.0.0.1:8000/inventario/brands/",
+      "POST",
+      payload
+    );
+    return result;
+  },
+  createSupplier: async (payload) => {
+    const result = await Api.fetch(
+      "http://127.0.0.1:8000/inventario/suppliers/",
+      "POST",
+      payload
+    );
+    return result;
+  },
+  createProduct: async (payload) => {
     const result = await Api.fetch(
       "http://127.0.0.1:8000/inventario/productos/",
       "POST",
-      data
+      payload
     );
     return result;
   },
-  updateProduct: async (data, productId) => {
+  updateProduct: async (payload, productId) => {
     const result = await Api.fetch(
       `http://127.0.0.1:8000/inventario/productos/${productId}/`,
       "PUT",
-      data
+      payload
     );
     return result;
   },

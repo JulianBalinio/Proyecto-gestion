@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { InventoryCalls } from "/src/modules/Inventario/utils/apiCalls";
-import { defaultValues } from "./data";
+import { defaultValues, getFields } from "./data";
 import ChangesModalTemplate from "./templates/ChangesModal";
 
 export default function ChangesModal({
@@ -10,7 +10,8 @@ export default function ChangesModal({
   edit,
   fetchInventory,
 }) {
-  const [producto, setProducto] = useState(defaultValues);
+  const [product, setProduct] = useState(defaultValues);
+  const [attributesObject, setAttributesObject] = useState();
   const [options, setOptions] = useState({
     brands: [],
     categories: [],
@@ -19,14 +20,14 @@ export default function ChangesModal({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProducto((prevProducto) => {
-      return { ...prevProducto, [name]: value };
+    setProduct((prevProduct) => {
+      return { ...prevProduct, [name]: value };
     });
   };
 
   const handleSave = () => {
+    const { category, ...payload } = product;
     if (edit) {
-      const { category, ...payload } = producto;
       InventoryCalls.updateProduct({
         action: () => {
           fetchInventory();
@@ -39,15 +40,13 @@ export default function ChangesModal({
         productId: item.id,
       });
     } else {
-      const { category, ...payload } = producto;
       InventoryCalls.createProduct({
         action: () => {
           fetchInventory();
           onClose();
         },
         data: {
-          ...payload,
-          categoryId: category,
+          ...product,
         },
       });
     }
@@ -59,14 +58,14 @@ export default function ChangesModal({
         fetchInventory();
         onClose();
       },
-      productId: producto.id,
+      productId: product.id,
     });
   };
 
   useEffect(() => {
     const initializeItem = () => {
-      setProducto((prevProducto) => {
-        return { ...prevProducto, ...item, category: item.category.id };
+      setProduct((prev) => {
+        return { ...prev, ...item };
       });
     };
 
@@ -77,11 +76,18 @@ export default function ChangesModal({
     InventoryCalls.getOptions({ action: setOptions });
   }, []);
 
+  const fields = getFields({
+    product,
+    options,
+    setOptions,
+    setAttributesObject,
+  });
+
   return (
     <ChangesModalTemplate
-      producto={producto}
-      options={options}
       open={open}
+      fields={fields}
+      attributesObject={attributesObject}
       onClose={onClose}
       edit={edit}
       handleChange={handleChange}

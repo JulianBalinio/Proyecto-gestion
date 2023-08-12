@@ -1,3 +1,5 @@
+import { InventoryCalls } from "/src/modules/Inventario/utils/apiCalls";
+
 const defaultValues = {
   code: "",
   name: "",
@@ -8,11 +10,49 @@ const defaultValues = {
   supplier: "",
 };
 
+const defaultAttributeValues = {
+  name: "",
+};
+
+const defaultSupplierValues = {
+  name: "",
+  address: "",
+  phone: "",
+};
+
+const productAttributeFields = [
+  {
+    label: "Nombre",
+    name: "name",
+    required: true,
+    autoFocus: true,
+  },
+];
+
+const supplierFields = [
+  {
+    label: "Nombre",
+    name: "name",
+    required: true,
+  },
+  {
+    label: "Dirección",
+    name: "address",
+    required: true,
+  },
+  {
+    label: "Teléfono",
+    type: "number",
+    name: "phone",
+    required: true,
+  },
+];
+
 const validate = (fields) => {
   return fields.some((field) => field.required && field.value === "");
 };
 
-const getFields = (product, options, styles) => {
+const getFields = ({ product, options, setOptions, setAttributesObject }) => {
   return [
     {
       label: "Código",
@@ -20,16 +60,35 @@ const getFields = (product, options, styles) => {
       name: "code",
       value: product.code,
       required: true,
-      autoFocus: true,
-      className: styles.inputCode,
     },
     {
       label: "Categoría",
-      required: true,
       select: true,
       options: options.categories,
       name: "category",
       value: product.category,
+      onClick: () => {
+        setAttributesObject(() => {
+          return {
+            title: "Categoría",
+            open: true,
+            defaultValues: defaultAttributeValues,
+            fields: productAttributeFields,
+            onClose: () => {
+              setAttributesObject((prev) => ({ ...prev, open: false }));
+            },
+            handleSave: (data) => {
+              InventoryCalls.createCategory({
+                action: () => {
+                  setAttributesObject((prev) => ({ ...prev, open: false }));
+                  InventoryCalls.getOptions({ action: setOptions });
+                },
+                data: { name: data.name },
+              });
+            },
+          };
+        });
+      },
     },
     {
       label: "Marca",
@@ -37,6 +96,28 @@ const getFields = (product, options, styles) => {
       name: "brand",
       options: options.brands,
       value: product.brand,
+      onClick: () => {
+        setAttributesObject(() => {
+          return {
+            title: "Marca",
+            open: true,
+            defaultValues: defaultAttributeValues,
+            fields: productAttributeFields,
+            onClose: () => {
+              setAttributesObject((prev) => ({ ...prev, open: false }));
+            },
+            handleSave: (data) => {
+              InventoryCalls.createBrand({
+                action: () => {
+                  setAttributesObject((prev) => ({ ...prev, open: false }));
+                  InventoryCalls.getOptions({ action: setOptions });
+                },
+                data: { name: data.name },
+              });
+            },
+          };
+        });
+      },
     },
     {
       label: "Proveedor",
@@ -44,6 +125,28 @@ const getFields = (product, options, styles) => {
       name: "supplier",
       options: options.suppliers,
       value: product.supplier,
+      onClick: () => {
+        setAttributesObject(() => {
+          return {
+            title: "Proveedor",
+            open: true,
+            defaultValues: defaultSupplierValues,
+            fields: supplierFields,
+            onClose: () => {
+              setAttributesObject((prev) => ({ ...prev, open: false }));
+            },
+            handleSave: (data) => {
+              InventoryCalls.createSupplier({
+                action: () => {
+                  setAttributesObject((prev) => ({ ...prev, open: false }));
+                  InventoryCalls.getOptions({ action: setOptions });
+                },
+                data: { ...data },
+              });
+            },
+          };
+        });
+      },
     },
     {
       label: "Nombre",

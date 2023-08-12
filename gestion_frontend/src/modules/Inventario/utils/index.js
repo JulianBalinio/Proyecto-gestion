@@ -1,14 +1,6 @@
 export const getButtons = ({ action }) => [
   {
     onClick: () => {
-      action((prev) => ({ ...prev, category: true }));
-    },
-    color: "warning",
-    size: "small",
-    text: "Categorías",
-  },
-  {
-    onClick: () => {
       action((prev) => ({ ...prev, prices: true }));
     },
     color: "success",

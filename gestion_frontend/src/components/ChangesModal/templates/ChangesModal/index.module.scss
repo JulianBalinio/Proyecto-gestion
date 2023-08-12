@@ -23,7 +23,20 @@
       flex-direction: column;
       gap: 2rem;
 
+      .select {
+        display: flex;
+        width: 100%;
+        gap: 1rem;
+
+        .button {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+
       .inputCode {
+
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
           -webkit-appearance: none;

@@ -1,23 +1,25 @@
-import { MenuItem, Typography } from "@mui/material";
-import { getFields, validate } from "../../data";
+import { Box, MenuItem, Typography } from "@mui/material";
+import { validate } from "../../data";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+
 import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import TextField from "@mui/material/TextField";
 import styles from "./index.module.scss";
+import AttributesModal from "../../../AttributesModal";
 
 export default function ChangesModalTemplate({
-  producto,
-  options,
   open,
+  fields,
+  attributesObject,
   onClose,
   edit,
   handleChange,
   handleDelete,
   handleSave,
 }) {
-  const fields = getFields(producto, options, styles);
   return (
     <Drawer
       anchor="right"
@@ -36,29 +38,39 @@ export default function ChangesModalTemplate({
           <ListItem className={styles.form}>
             {fields.map((field, key) => {
               return (
-                <TextField
-                  key={key}
-                  label={field.label}
-                  type={field.type}
-                  name={field.name}
-                  value={field.value}
-                  required={field.required}
-                  fullWidth={true}
-                  autoFocus={field.autoFocus}
-                  className={field.className}
-                  select={field.select}
-                  placeholder={field.placeholder}
-                  onChange={(e) => handleChange(e)}
-                >
-                  {field.select &&
-                    field.options.map((option, key) => {
-                      return (
-                        <MenuItem key={key} value={option.id}>
-                          {option.name}
-                        </MenuItem>
-                      );
-                    })}
-                </TextField>
+                <div key={key} className={styles.select}>
+                  <TextField
+                    label={field.label}
+                    type={field.type}
+                    name={field.name}
+                    value={field.value}
+                    required={field.required}
+                    fullWidth={true}
+                    autoFocus={field.autoFocus}
+                    className={field.className}
+                    select={field.select}
+                    placeholder={field.placeholder}
+                    onChange={(e) => handleChange(e)}
+                  >
+                    {field.select &&
+                      field.options.map((option, key) => {
+                        return (
+                          <MenuItem key={key} value={option.id}>
+                            {option.name}
+                          </MenuItem>
+                        );
+                      })}
+                  </TextField>
+                  {field.select && (
+                    <Box className={styles.button}>
+                      <Button
+                        onClick={field.onClick}
+                        color="success"
+                        startIcon={<AddBoxIcon />}
+                      />
+                    </Box>
+                  )}
+                </div>
               );
             })}
           </ListItem>
@@ -90,6 +102,7 @@ export default function ChangesModalTemplate({
           </ListItem>
         </List>
       </div>
+      <AttributesModal {...attributesObject} />
     </Drawer>
   );
 }

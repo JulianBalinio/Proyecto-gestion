@@ -22,6 +22,9 @@ class BrandSerializer(serializers.ModelSerializer):
             'id',
             'name',
         ]
+        extra_kwargs = {
+            'id': {'required': False}
+        }
 
 
 class SupplierSerializer(serializers.ModelSerializer):
@@ -34,15 +37,16 @@ class SupplierSerializer(serializers.ModelSerializer):
             'phone',
             'balance'
         ]
+        extra_kwargs = {
+            'id': {'required': False},
+            'balance': {'required': False}
+        }
 
 
 class ProductoSerializer(serializers.ModelSerializer):
-    category_id = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all(),
-        source='category',
-        write_only=True
-    )
-    category = CategorySerializer(read_only=True)
+    category_label = serializers.SerializerMethodField()
+    brand_label = serializers.SerializerMethodField()
+    supplier_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -52,7 +56,26 @@ class ProductoSerializer(serializers.ModelSerializer):
             'code',
             'stock',
             'price',
-            'category_id',
             'category',
+            'category_label',
+            'brand',
+            'brand_label',
+            'supplier',
+            'supplier_label',
             'last_edit_date'
         ]
+        extra_kwargs = {
+            'category': {'required': False},
+            'category_label': {'required': False},
+            'brand': {'required': False},
+            'supplier': {'required': False},
+        }
+
+    def get_category_label(self, obj):
+        return obj.category.name if obj.category else None
+    
+    def get_brand_label(self, obj):
+        return obj.brand.name if obj.brand else None
+    
+    def get_supplier_label(self, obj):
+        return obj.supplier.name if obj.supplier else None
