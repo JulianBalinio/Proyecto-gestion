@@ -23,6 +23,7 @@ function DataTable({ searchTerm, rows, fetchInventory }) {
         rows={filteredRows}
         columns={columns}
         pageSize={5}
+        showCellVerticalBorder
         rowsPerPageOptions={[5]}
         localeText={localeText}
       />

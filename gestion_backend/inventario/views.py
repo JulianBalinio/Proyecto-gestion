@@ -6,10 +6,12 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action, APIView, api_view
 from drf_yasg.utils import swagger_auto_schema
 from .models import Product, Category, Suppliers, Brands
-from .serializers import ProductoSerializer, CategorySerializer, BrandSerializer, SupplierSerializer
+from .serializers import ProductoSerializer, CategorySerializer, BrandSerializer, SupplierSerializer, ProductUpdateSerializer
 
 
 class ProductosViewSet(ViewSet):
+    queryset = Product.objects.all()
+
     @swagger_auto_schema(operation_description="Obtener todos los productos.")
     def list(self, request):
         productos = Product.objects.all()
@@ -68,6 +70,26 @@ class ProductosViewSet(ViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(request_body=ProductUpdateSerializer, operation_description='Actualizar precios.')
+    @action(detail=False, methods=["POST"])
+    def update_prices(self, request):
+        serializer = ProductUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        products = self.queryset
+
+        if serializer.validated_data.get('category'):
+            products = products.filter(
+                category=serializer.validated_data['category'])
+
+        if serializer.validated_data.get('brand'):
+            products = products.filter(
+                brand=serializer.validated_data['brand'])
+
+        serializer.update_prices(products)
+
+        return Response({'message': 'Precios actualizados correctamente.'}, status=status.HTTP_200_OK)
+
     @swagger_auto_schema(operation_description="Borrar producto en base a su ID.")
     def destroy(self, request, pk=None):
         try:
@@ -77,35 +99,6 @@ class ProductosViewSet(ViewSet):
 
         producto.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-class UpdatePricesView(APIView):
-    @swagger_auto_schema(operation_description='Actualizar precios.')
-    def update_prices(self, request):
-        update_type = request.data.get('update_type')
-        category = request.data.get('category')
-        brand = request.data.get('brand')
-        new_price = request.data.get('new_price')
-        percentage = request.data.get('percentage')
-
-        products = self.get_queryset()
-
-        if category:
-            products = products.filter(category=category)  # Filtrar por categoría
-
-        if brand:
-            products = products.filter(brand=brand)
-        
-        if update_type == 'price':
-            if not new_price:
-                return Response({'error': 'Se requiere el precio de actualización para finalizar la acción.'}, status=status.HTTP_400_BAD_REQUEST)
-            products.update(price = new_price)
-        elif update_type == 'percentage':
-            if not percentage:
-                return Response({'error': 'El porcentaje de actualización es requerido para finalizar la acción.'}, status=status.HTTP_400_BAD_REQUEST)
-            products.update(price = F('price') * (1 + percentage /100))
-
-        return Response({'message': 'Precios actualizados correctamente.'}, status=status.HTTP_200_OK)
-
 
 
 class BaseCreateView(APIView):
