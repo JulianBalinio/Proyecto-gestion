@@ -1,6 +1,6 @@
 # Se definen urls para inventario
 from django.urls import path, include
-from .views import ProductosViewSet, CategoryViewSet, BrandViewSet, SupplierViewSet
+from .views import ProductosViewSet, CategoryViewSet, BrandViewSet, SupplierViewSet, UpdatePricesView
 from rest_framework.routers import DefaultRouter
 
 app_name = 'inventario'
@@ -19,4 +19,10 @@ router.register(
     r'suppliers', SupplierViewSet, basename='suppliers'
 )
 
-urlpatterns = [path('', include(router.urls))]
+
+
+urlpatterns = [
+    path('', include(router.urls)),
+    path('update_prices/', UpdatePricesView.as_view(), name='update_prices')
+    ]
+

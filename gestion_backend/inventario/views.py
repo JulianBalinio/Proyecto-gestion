@@ -1,8 +1,9 @@
 # from rest_framework.permissions import IsAuthenticated
+from django.db.models import F
 from rest_framework.views import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
-from rest_framework.decorators import action
+from rest_framework.decorators import action, APIView, api_view
 from drf_yasg.utils import swagger_auto_schema
 from .models import Product, Category, Suppliers, Brands
 from .serializers import ProductoSerializer, CategorySerializer, BrandSerializer, SupplierSerializer
@@ -77,8 +78,60 @@ class ProductosViewSet(ViewSet):
         producto.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class UpdatePricesView(APIView):
+    @swagger_auto_schema(operation_description='Actualizar precios.')
+    def update_prices(self, request):
+        update_type = request.data.get('update_type')
+        category = request.data.get('category')
+        brand = request.data.get('brand')
+        new_price = request.data.get('new_price')
+        percentage = request.data.get('percentage')
 
-class CategoryViewSet(ViewSet):
+        products = self.get_queryset()
+
+        if category:
+            products = products.filter(category=category)  # Filtrar por categoría
+
+        if brand:
+            products = products.filter(brand=brand)
+        
+        if update_type == 'price':
+            if not new_price:
+                return Response({'error': 'Se requiere el precio de actualización para finalizar la acción.'}, status=status.HTTP_400_BAD_REQUEST)
+            products.update(price = new_price)
+        elif update_type == 'percentage':
+            if not percentage:
+                return Response({'error': 'El porcentaje de actualización es requerido para finalizar la acción.'}, status=status.HTTP_400_BAD_REQUEST)
+            products.update(price = F('price') * (1 + percentage /100))
+
+        return Response({'message': 'Precios actualizados correctamente.'}, status=status.HTTP_200_OK)
+
+
+
+class BaseCreateView(APIView):
+    serializer_class = None
+    model_class = None
+
+    def create(self, request):
+        instance_data = request.data
+        serializer = self.serializer_class(data=instance_data)
+
+        if serializer.is_valid():
+            instance_name = instance_data.get('name')
+
+            if self.model_class.objects.filter(name=instance_name).exists():
+                return Response({'error': f'Esta {self.model_class.__name__} ya se encuentra definida.'}, status=status.HTTP_204_NO_CONTENT)
+
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({'error': 'Categoria ya definida'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CategoryViewSet(ViewSet, BaseCreateView):
+    serializer_class = CategorySerializer
+    model_class = Category
+
     @swagger_auto_schema(operation_description="Obtener todas las categorías.")
     def list(self, request):
         categories = Category.objects.all()
@@ -87,16 +140,14 @@ class CategoryViewSet(ViewSet):
 
     @swagger_auto_schema(request_body=CategorySerializer)
     def create(self, request):
-        category = request.data
-        serializer = CategorySerializer(data=category)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # llamado a la funcion create de la clase BaseCreateView con super()
+        return super().create(request)
 
 
-class BrandViewSet(ViewSet):
+class BrandViewSet(ViewSet, BaseCreateView):
+    serializer_class = BrandSerializer
+    model_class = Brands
+
     @swagger_auto_schema(operation_description="Obtener todas las marcas")
     def list(self, request):
         brands = Brands.objects.all()
@@ -105,13 +156,8 @@ class BrandViewSet(ViewSet):
 
     @swagger_auto_schema(request_body=BrandSerializer)
     def create(self, request):
-        brand = request.data
-        serializer = BrandSerializer(data=brand)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # llamado a la funcion create de la clase BaseCreateView con super()
+        return super().create(request)
 
 
 class SupplierViewSet(ViewSet):
