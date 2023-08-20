@@ -9,53 +9,9 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
-from django.core.exceptions import ValidationError
 from .models import User
-from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer
-from .validators import send_code_email, validate_code
-
-
-class UserSignUp(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-    def perform_create(self, serializer):
-        raw_password = self.request.data.get('password')
-        # Se encripta la contraseñaser
-        serializer.validated_data['password'] = make_password(raw_password)
-        super().perform_create(serializer)
-
-        # Se guarda el objeto del usuario sin completar el registro sin agregarlo a la bd
-        user = serializer.save(commit=False)
-
-        # Enviar codigo de validacion por correo (validatos.py)
-        send_code_email(
-            user, 'Código de autenticación de registro',
-            'Tu código de autenticación es: {}. Utilízalo para completar el registro.',
-            'register_code', 'register_code_created_at'
-        )
-        return Response({'message': 'Se ha enviado un código de verificación. Por favor, revisa tu correo electrónico.'}, status=status.HTTP_201_CREATED)
-
-    def verify_registration_code(self, request, *args, **kwargs):
-        user_id = kwargs.get('pk')
-        code = request.data.get('code')
-
-        try:
-            user = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-        try:
-            validate_code(user, code, 'autenticación de registro',
-                          'register_code', 'register_code_created_at')
-        except ValidationError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.is_verified = True  # Marcar el registro como verificado
-        user.save()
-
-        return Response({'message': 'Registro completado exitosamente.'}, status=status.HTTP_200_OK)
+from .serializers import LoginSerializer, ChangePasswordSerializer
 
 
 class UserSignIn(generics.GenericAPIView):

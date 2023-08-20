@@ -22,17 +22,6 @@ def validate_password(value):
         raise ValidationError(
             'La contraseña debe contener al menos un caracter especial.')
 
-
-name_validator = RegexValidator(
-    regex=r'^[a-zA-Z]+$',
-    message='El nombre debe contener solo letras.'
-)
-
-phone_validator = RegexValidator(
-    regex=r'^(\+?54|0)(\d{10}|\d{2,4}\s?\d{6,10})$',
-    message='El número de teléfono debe tener un formato válido'
-)
-
 def generate_code():
     return str(secrets.randbelow(900000) + 100000)
 

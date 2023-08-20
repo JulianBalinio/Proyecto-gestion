@@ -1,52 +1,33 @@
 import React, { useContext, useState } from "react";
-import Header from "/src/components/Header";
-import LoginForm from "/src/components/LoginForm";
 import { LoginCalls } from "/src/modules/Login/utils/apiCalls";
 import { AuthContext } from "/src/services/AuthContext";
 import { useNavigate } from "react-router-dom";
+import LoginTemplate from "/src/modules/Login/templates/Login";
 
 export default function Login() {
-  const [isLogin, setIsLogin] = useState(true);
-  const { setAuthToken } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [error, setError] = useState();
+  const { setAuthToken } = useContext(AuthContext);
 
   const afterLogin = (data) => {
-    const { access_token, error } = data;
-
-    if (error) {
-      alert(error);
+    const { access_token, detail, error, email_address } = data;
+    if (!access_token) {
+      setError(detail || error || email_address);
     } else {
       setAuthToken(access_token);
       navigate("/");
     }
   };
 
-  const handleSign = async (userData) => {
-    if (isLogin) {
-      LoginCalls.signIn({
-        action: (data) => {
-          afterLogin(data);
-        },
-        payload: userData,
-      });
-    } else {
-      LoginCalls.signUp({
-        action: (data) => {
-          console.log(data);
-        },
-        payload: userData,
-      });
-    }
+  const handleSignIn = async (userData) => {
+    setError(null);
+    LoginCalls.signIn({
+      action: (data) => {
+        afterLogin(data);
+      },
+      payload: userData,
+    });
   };
 
-  return (
-    <main>
-      <Header />
-      <LoginForm
-        isLogin={isLogin}
-        setIsLogin={setIsLogin}
-        onSubmit={handleSign}
-      />
-    </main>
-  );
+  return <LoginTemplate onSubmit={handleSignIn} error={error} />;
 }

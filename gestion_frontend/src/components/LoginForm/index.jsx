@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Button, Typography } from "@mui/material";
-import { defaultValues, getFields } from "../../modules/Login/data";
+import { getFields } from "../../modules/Login/data";
 import TextField from "@mui/material/TextField";
 import styles from "./index.module.scss";
 
-export default function LoginForm({ isLogin, setIsLogin, onSubmit }) {
-  const [user, setUser] = useState(defaultValues);
+export default function LoginForm({ onSubmit, error }) {
+  const [user, setUser] = useState({ emailAddress: "", password: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,12 +19,16 @@ export default function LoginForm({ isLogin, setIsLogin, onSubmit }) {
     onSubmit(user);
   };
 
-  const fields = getFields(user, isLogin);
+  const fields = getFields(user);
+
+  const validateSubmit = (fields) => {
+    return fields.some((field) => field.required && field.value === "");
+  };
 
   return (
     <div className={styles.formContainer}>
       <form className={styles.form}>
-        <Typography variant="h4">{isLogin ? "Login" : "Registro"}</Typography>
+        <Typography variant="h5">Iniciar sesión</Typography>
         {fields.map((field, key) => {
           return (
             <TextField
@@ -34,26 +38,30 @@ export default function LoginForm({ isLogin, setIsLogin, onSubmit }) {
               name={field.name}
               shrink={field.shrink}
               value={field.value}
+              InputLabelProps={field.inputLabelProps}
               required={field.required}
               fullWidth={true}
               autoFocus={field.autoFocus}
               className={field.className}
+              placeholder={field.placeholder}
               select={field.select}
               onChange={(e) => handleChange(e)}
             />
           );
         })}
-        <br />
-        <div className={styles.actionButtons}>
+
+        <div className={styles.errorContainer}>
+          <Typography color={"#d32f2f"}>{error}</Typography>
+        </div>
+
+        <div>
           <Button
             variant="contained"
-            color="secondary"
-            onClick={() => setIsLogin((prev) => !prev)}
+            color="primary"
+            onClick={handleSubmit}
+            disabled={validateSubmit(fields)}
           >
-            {isLogin ? "Crear cuenta" : "Ya tengo cuenta"}
-          </Button>
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
-            {isLogin ? "Iniciar sesión" : "Registrarse"}
+            Confirmar
           </Button>
         </div>
       </form>
