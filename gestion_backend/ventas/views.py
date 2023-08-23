@@ -1,9 +1,14 @@
 from rest_framework.views import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
-from .models import OrderDetails
+from .models import Order, OrderDetails, Client
 from .serializers import OrderDetailsSerializer
+from .queries import apply_item_discount, apply_global_discount
+
 
 class OrderViewset(ViewSet):
     @swagger_auto_schema(operation_description="Obtener todas las ordenes de compra.")
@@ -32,11 +37,11 @@ class OrderViewset(ViewSet):
             order = OrderDetails.objects.get(pk=pk)
         except OrderDetails.DoesNotExist:
             return Response({'error': 'Orden no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         serializer = OrderDetailsSerializer(instance=order)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    #Create
+
+    # Create
     @swagger_auto_schema(operation_description="Crear orden de compra.")
     def create(self, request):
         """
@@ -55,27 +60,59 @@ class OrderViewset(ViewSet):
             - Código de estado: 409
             - Contenido: {'errors': [lista de errores de stock]}
         """
-        serializer = OrderDetailsSerializer(data = request.data)
+        serializer = OrderDetailsSerializer(data=request.data)
         if serializer.is_valid():
             order_data = serializer.validated_data
             order_items = order_data.get('orderdetails_set', [])
             errors = validate_stock(order_items)
-            
+
             if errors:
                 return Response({'errors': errors}, status=status.HTTP_409_CONFLICT)
-            
-            serializer.save()
+
+            cash_received = request.data.get('cash_received', 0)
+            client_data = request.data.get('client_data', {})
+
+            with transaction.atomic():
+                order = Order.objects.create(
+                    user=request.user, order_date=timezone.now())
+
+                total_price = apply_item_discount(order_items)
+                total_price_with_discount = apply_global_discount(
+                    total_price, request.data.get('global_discount', 0))
+
+                order.total_price = total_price_with_discount
+                order.save()
+
+                client = None
+                if client_data:
+                    try:
+                        client = Client.objects.get(**client_data)
+                    except Client.DoesNotExist:
+                        raise ValidationError(
+                            'El cliente proporcionado no existe.')
+                    
+                    if cash_received >= total_price_with_discount:
+                        change = cash_received - total_price_with_discount
+                        client.credit -= change
+                    else:
+                        client.debt += total_price_with_discount - cash_received
+                    client.save()
+                    order.client = client
+                    order.save()
+
+            OrderDetails.objects.bulk_create(
+                [OrderDetails(**item) for item in order_items])
             return Response({'message': 'Orden creada con éxito.'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    #Delete
+    # Delete
     @swagger_auto_schema(operation_description="Eliminar orden de compra.")
     def delete(self, request, pk=None):
         """
         Elimina una orden de compra según su ID.
         Parámetros:
         - pk (int): ID de la orden de compra.
-        
+
         Respuestas posibles:
         - Éxito:
             - Código de estado: 200
@@ -91,8 +128,8 @@ class OrderViewset(ViewSet):
             return Response({'message': 'Orden eliminada exitosamente.'})
         except OrderDetails.DoesNotExist:
             return Response({'error': 'Orden no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
-        
-    #Update
+
+    # Update
     @swagger_auto_schema(operation_description="Actualizar orden de compra.")
     def update(self, request, pk=None):
         """
@@ -120,7 +157,7 @@ class OrderViewset(ViewSet):
             order = OrderDetails.objects.get(pk=pk)
         except OrderDetails.DoesNotExist:
             return Response({'error': 'Orden no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         serializer = OrderDetailsSerializer(instance=order, data=request.data)
 
         if serializer.is_valid():
@@ -130,12 +167,12 @@ class OrderViewset(ViewSet):
 
             if errors:
                 return Response({'errors': errors}, status=status.HTTP_409_CONFLICT)
-            
+
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    #List con filtrado
+
+    # List con filtrado
     @swagger_auto_schema(operation_description="Filtrar ordenes de compra.")
     def filter_list(self, request):
         """
@@ -160,7 +197,8 @@ class OrderViewset(ViewSet):
 
         serializer = OrderDetailsSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+
 def validate_stock(order_items):
     """
     Realiza la validación del stock para los items de una orden de compra.
@@ -170,12 +208,13 @@ def validate_stock(order_items):
     - Lista de errores de stock.
     """
     errors = []
-    
+
     for order_item in order_items:
         product = order_item['product']
         quantity = order_item['quantity']
 
         if product.stock < quantity:
-            errors.append(f'Stock insuficiente para {product.name}. Cantidad requerida: {quantity}. Stock disponible: {product.stock}')
-    
+            errors.append(
+                f'Stock insuficiente para {product.name}. Cantidad requerida: {quantity}. Stock disponible: {product.stock}')
+
     return errors
