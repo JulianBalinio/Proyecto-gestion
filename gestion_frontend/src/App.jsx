@@ -9,11 +9,11 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute />}>
           <Route path="/" element={<Inventario />} />
           <Route path="/ventas" element={<Ventas />} />
         </Route>
+        <Route path="/login" element={<Login />} />
       </Routes>
     </AuthProvider>
   );

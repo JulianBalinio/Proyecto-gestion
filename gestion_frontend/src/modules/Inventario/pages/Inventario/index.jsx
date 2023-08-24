@@ -27,6 +27,7 @@ const Inventario = () => {
     open: openModal,
     action: setOpenModal,
     key: "prices",
+    fetchInventory,
   });
 
   const buttons = getButtons({ action: setOpenModal });

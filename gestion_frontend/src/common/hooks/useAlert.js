@@ -17,21 +17,21 @@ export const useAlert = () => {
     description = "",
     handleAccept,
     handleClose,
-    showCheckbox = false,
     showCancel = false,
     extraButton,
     buttonsDisabled = false,
     confirmButtonLabel,
   }) => {
     const config = {
-      alertType: alertType,
-      title: title,
-      description: description,
-      //   showCheckbox,
-      //   showCancel,
+      alertType,
+      title,
+      description,
+      handleAccept,
+      handleClose,
+      showCancel,
       open: true,
-      //   extraButton,
-      //   buttonsDisabled,
+      extraButton,
+      buttonsDisabled,
       confirmButtonLabel,
     };
     Object.assign(config, {
@@ -62,9 +62,30 @@ export const useAlert = () => {
       extraButton,
     });
 
+  const showSuccessAlert = ({
+    title = "Operación exitosa",
+    description = "Los cambios se realizaron con éxito.",
+    handleAccept,
+    handleClose,
+    showCancel = false,
+    showCheckbox,
+    extraButton,
+  }) =>
+    showAlert({
+      alertType: "success",
+      title: title,
+      description,
+      handleAccept,
+      handleClose,
+      showCancel,
+      showCheckbox,
+      extraButton,
+    });
+
   return {
     alertDialog,
     showAlert,
+    showSuccessAlert,
     showErrorAlert,
     closeAlert,
   };

@@ -64,7 +64,7 @@ const getFields = ({ product, options, setOptions, setAttributesObject }) => {
     {
       label: "Categoría",
       select: true,
-      options: options.categories,
+      options: options.category,
       name: "category",
       value: product.category,
       onClick: () => {
@@ -94,7 +94,7 @@ const getFields = ({ product, options, setOptions, setAttributesObject }) => {
       label: "Marca",
       select: true,
       name: "brand",
-      options: options.brands,
+      options: options.brand,
       value: product.brand,
       onClick: () => {
         setAttributesObject(() => {
@@ -123,7 +123,7 @@ const getFields = ({ product, options, setOptions, setAttributesObject }) => {
       label: "Proveedor",
       select: true,
       name: "supplier",
-      options: options.suppliers,
+      options: options.supplier,
       value: product.supplier,
       onClick: () => {
         setAttributesObject(() => {

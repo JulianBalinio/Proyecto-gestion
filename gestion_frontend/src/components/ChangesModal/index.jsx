@@ -13,9 +13,9 @@ export default function ChangesModal({
   const [product, setProduct] = useState(defaultValues);
   const [attributesObject, setAttributesObject] = useState();
   const [options, setOptions] = useState({
-    brands: [],
-    categories: [],
-    suppliers: [],
+    brand: [],
+    category: [],
+    supplier: [],
   });
 
   const handleChange = (e) => {

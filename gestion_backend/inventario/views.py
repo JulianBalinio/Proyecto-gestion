@@ -40,9 +40,9 @@ class ProductosViewSet(ViewSet):
         brands_serializer = BrandSerializer(brands, many=True)
 
         options_data = {
-            'categories': category_serializer.data,
-            'suppliers': suppliers_serializer.data,
-            'brands': brands_serializer.data,
+            'category': category_serializer.data,
+            'supplier': suppliers_serializer.data,
+            'brand': brands_serializer.data,
         }
 
         return Response(options_data, status=status.HTTP_200_OK)
@@ -71,7 +71,7 @@ class ProductosViewSet(ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(request_body=ProductUpdateSerializer, operation_description='Actualizar precios.')
-    @action(detail=False, methods=["POST"])
+    @action(detail=False, methods=["PUT"])
     def update_prices(self, request):
         serializer = ProductUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -81,11 +81,15 @@ class ProductosViewSet(ViewSet):
         if serializer.validated_data.get('category'):
             products = products.filter(
                 category=serializer.validated_data['category'])
+            
+        if serializer.validated_data.get('supplier'):
+            products = products.filter(
+                supplier=serializer.validated_data['supplier'])
 
         if serializer.validated_data.get('brand'):
             products = products.filter(
                 brand=serializer.validated_data['brand'])
-
+            
         serializer.update_prices(products)
 
         return Response({'message': 'Precios actualizados correctamente.'}, status=status.HTTP_200_OK)

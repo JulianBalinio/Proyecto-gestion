@@ -1,8 +1,6 @@
-import React from "react";
-import { Typography } from "@mui/material";
-import ButtonMUI from "@mui/material/Button";
-// import Checkbox from "components/atoms/Checkbox";
-// import classes from "./index.module.scss";
+import React, { useMemo } from "react";
+import { Button } from "@mui/material";
+import classes from "./index.module.scss";
 
 const AlertFooter = ({
   alertType,
@@ -11,10 +9,8 @@ const AlertFooter = ({
   showCancel = true,
   confirmButtonLabel,
   buttonsDisabled,
-  //   extraButton,
-  //   showCheckbox = false,
 }) => {
-  const getConfirmButtonLabel = (alertType, confirmButtonLabel) => {
+  const getConfirmButtonLabel = useMemo(() => {
     if (confirmButtonLabel) {
       return confirmButtonLabel;
     } else {
@@ -26,14 +22,14 @@ const AlertFooter = ({
         return "Aceptar";
       }
     }
-  };
+  }, [alertType, confirmButtonLabel]);
 
   return (
     <>
       <div>
-        {/* {showCancel && (
+        {showCancel && (
           <div>
-            <ButtonMUI
+            {/* <ButtonMUI
               color={
                 !["success", "warning"].includes(color) ? color : "inherit"
               }
@@ -45,18 +41,21 @@ const AlertFooter = ({
               disableRipple={true}
             >
               {label}
-            </ButtonMUI>
+            </ButtonMUI> */}
           </div>
-        )} */}
+        )}
 
-        <ButtonMUI
-          handleClick={handleAccept}
-          size="small"
+        <Button
+          onClick={handleAccept}
+          className={classes.button}
           color={"primary"}
-          variant={"contained"}
-          label={getConfirmButtonLabel(alertType, confirmButtonLabel)}
+          size="large"
+          variant="contained"
+          label={"Aceptar"}
           disabled={buttonsDisabled}
-        />
+        >
+          {getConfirmButtonLabel}
+        </Button>
       </div>
     </>
   );

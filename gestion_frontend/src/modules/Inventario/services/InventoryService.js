@@ -1,30 +1,25 @@
 import { Api } from "/src/services/ApiService";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export const InventoryService = {
   getInventory: async (params) => {
-    const result = await Api.fetch(
-      "http://127.0.0.1:8000/inventario/productos/",
-      "GET"
-    );
+    const result = await Api.fetch(`${VITE_API_URL}/inventario/productos/`, "GET");
     return result;
   },
   getCategories: async (params) => {
-    const result = await Api.fetch(
-      "http://127.0.0.1:8000/inventario/categories/",
-      "GET"
-    );
+    const result = await Api.fetch(`${VITE_API_URL}/inventario/categories/`, "GET");
     return result;
   },
   getOptions: async (params) => {
     const result = await Api.fetch(
-      "http://127.0.0.1:8000/inventario/productos/options/",
+      `${VITE_API_URL}/inventario/productos/options/`,
       "GET"
     );
     return result;
   },
   createCategory: async (payload) => {
     const result = await Api.fetch(
-      "http://127.0.0.1:8000/inventario/categories/",
+      `${VITE_API_URL}/inventario/categories/`,
       "POST",
       payload
     );
@@ -32,7 +27,7 @@ export const InventoryService = {
   },
   createBrand: async (payload) => {
     const result = await Api.fetch(
-      "http://127.0.0.1:8000/inventario/brands/",
+      `${VITE_API_URL}/inventario/brands/`,
       "POST",
       payload
     );
@@ -40,7 +35,7 @@ export const InventoryService = {
   },
   createSupplier: async (payload) => {
     const result = await Api.fetch(
-      "http://127.0.0.1:8000/inventario/suppliers/",
+      `${VITE_API_URL}/inventario/suppliers/`,
       "POST",
       payload
     );
@@ -48,15 +43,23 @@ export const InventoryService = {
   },
   createProduct: async (payload) => {
     const result = await Api.fetch(
-      "http://127.0.0.1:8000/inventario/productos/",
+      `${VITE_API_URL}/inventario/productos/`,
       "POST",
+      payload
+    );
+    return result;
+  },
+  updatePrices: async (payload) => {
+    const result = await Api.fetch(
+      `${VITE_API_URL}/inventario/productos/update_prices/`,
+      "PUT",
       payload
     );
     return result;
   },
   updateProduct: async (payload, productId) => {
     const result = await Api.fetch(
-      `http://127.0.0.1:8000/inventario/productos/${productId}/`,
+      `${VITE_API_URL}/inventario/productos/${productId}/`,
       "PUT",
       payload
     );
@@ -64,7 +67,7 @@ export const InventoryService = {
   },
   deleteProduct: async (productId) => {
     const result = await Api.fetch(
-      `http://127.0.0.1:8000/inventario/productos/${productId}/`,
+      `${VITE_API_URL}/inventario/productos/${productId}/`,
       "DELETE"
     );
     return result;

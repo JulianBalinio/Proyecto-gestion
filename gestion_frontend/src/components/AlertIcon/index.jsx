@@ -10,17 +10,17 @@ const AlertIcon = ({ action }) => {
   return action === "error" ? (
     <ErrorIcon
       className={`${classes.errorIcon} ${classes.icon}`}
-      fontSize={"inherit"}
+      sx={{ fontSize: "5rem" }}
     />
   ) : action === "warning" ? (
     <WarningIcon
       className={`${classes.warningIcon} ${classes.icon}`}
-      fontSize={"inherit"}
+      sx={{ fontSize: "5rem" }}
     />
   ) : action === "success" ? (
     <SuccessIcon
       className={`${classes.successIcon} ${classes.icon}`}
-      fontSize={"inherit"}
+      sx={{ fontSize: "5rem" }}
     />
   ) : (
     false

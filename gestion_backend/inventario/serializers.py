@@ -84,7 +84,7 @@ class ProductoSerializer(serializers.ModelSerializer):
 
 class PriceUpdateSerializer(serializers.Serializer):
     update_type = serializers.ChoiceField(choices=['price', 'percentage'])
-    new_price = serializers.DecimalField(
+    price = serializers.DecimalField(
         max_digits=10, decimal_places=2, required=False)
     percentage = serializers.DecimalField(
         max_digits=5, decimal_places=2, required=False)
@@ -93,20 +93,28 @@ class PriceUpdateSerializer(serializers.Serializer):
 class ProductUpdateSerializer(serializers.Serializer):
     category = serializers.CharField(required=False)
     brand = serializers.CharField(required=False)
+    supplier = serializers.CharField(required=False)
     price_update = PriceUpdateSerializer()
 
     def update_prices(self, products):
         update_data = self.validated_data.get('price_update', {})  # Obtener los datos de actualización, o un diccionario vacío si no está presente
         update_type = update_data.get('update_type')
-        new_price = update_data.get('new_price')
-        percentage = update_data.get('percentage')
+
+        if not update_type:
+            raise serializers.ValidationError(
+                {'error': 'Se requiere el tipo de actualización a realizar.'}
+            )
 
         if update_type == 'price':
-            if not new_price:
+            price = update_data.get('price')
+            if not price:
                 raise serializers.ValidationError(
                     {'error': 'Se requiere el precio de actualización para finalizar la acción.'})
-            products.update(price=F('price') + new_price)
+            products.update(price=F('price') + price)
+
         elif update_type == 'percentage':
+            percentage = update_data.get('percentage')
+
             if not percentage:
                 raise serializers.ValidationError(
                     {'error': 'El porcentaje de actualización es requerido para finalizar la acción.'})

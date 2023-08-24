@@ -1,8 +1,11 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useState } from "react";
 const AuthContext = createContext();
+const isDebugMode = import.meta.env.VITE_DEBUG === "true";
 
 const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState();
+  const [token, setToken] = useState(
+    (isDebugMode && localStorage.getItem("access_token")) || null
+  );
 
   const setAuthToken = (newToken) => {
     setToken(newToken);

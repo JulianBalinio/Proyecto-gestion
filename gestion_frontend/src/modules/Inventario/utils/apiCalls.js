@@ -37,6 +37,11 @@ const InventoryCalls = {
       .then((data) => action(data))
       .catch((err) => console.error(err));
   },
+  updatePrices: ({ action, data }) => {
+    InventoryService.updatePrices(convertKeysSnakeToCamel(data))
+      .then((data) => action(data))
+      .catch((err) => console.error(err));
+  },
   updateProduct: ({ action, data, productId }) => {
     InventoryService.updateProduct(convertKeysSnakeToCamel(data), productId)
       .then((data) => action(data))

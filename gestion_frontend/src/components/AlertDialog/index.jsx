@@ -4,7 +4,7 @@ import { CancelOutlined } from "@mui/icons-material";
 import Dialog from "@mui/material/Dialog";
 import AlertFooter from "/src/components/AlertFooter";
 import AlertIcon from "/src/components/AlertIcon";
-// import classes from "./styles";
+import classes from "./index.module.scss";
 
 /**
  * @function AlertDialog
@@ -30,7 +30,6 @@ const AlertDialog = ({
   showCancel = true,
   buttonsDisabled = false,
 }) => {
-  console.log(title);
   return (
     <Dialog
       open={open}
@@ -39,34 +38,33 @@ const AlertDialog = ({
       aria-describedby="alert-dialog-description"
       // BackdropProps={{ classes: { root: classes.backdropBg } }}
     >
-      <div>
-        <div>
+      <div className={classes.root}>
+        <div className={classes.closeIcon}>
           <CancelOutlined
-            handleClose={handleClose}
             color={"primary"}
-            fontSize={"inherit"}
+            onClick={handleClose}
+            fontSize={"large"}
           />
         </div>
-        <div>
+
+        <div className={classes.body}>
           <AlertIcon action={alertType} />
           <div>
-            <Typography variant="h2" color="inherit">
+            <Typography variant="h5" color="inherit">
               {title}
             </Typography>
-            <Typography variant="h5" color={"textSecondary"}>
+            <Typography variant="h6" color="textSecondary">
               {description}
             </Typography>
           </div>
         </div>
 
-        <div>
+        <div className={classes.footer}>
           <AlertFooter
             alertType={alertType}
-            handleAccept={actionAccept}
             handleClose={handleClose}
-            showCheckbox={showCheckbox}
+            handleAccept={actionAccept}
             showCancel={showCancel}
-            extraButton={extraButton}
             confirmButtonLabel={confirmButtonLabel}
             buttonsDisabled={buttonsDisabled}
           />

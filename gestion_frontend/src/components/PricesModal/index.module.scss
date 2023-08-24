@@ -7,9 +7,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 40%;
-    height: 80%;
-    padding: 2rem;
+    width: 25%;
+    height: 70%;
     background-color: white;
   
     .title {
@@ -22,8 +21,8 @@
     }
   
     .button {
-      margin-top: auto;
       width: 40%;
+      margin: auto 0 2rem 0;
       padding: 1rem;
     }
   }
