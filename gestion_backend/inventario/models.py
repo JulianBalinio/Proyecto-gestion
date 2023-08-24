@@ -32,7 +32,8 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=0)
     price = models.DecimalField(
         max_digits=7, decimal_places=2, null=False, blank=False)
-    category = models.ForeignKey(to=Category, on_delete=models.CASCADE, null=True)
+    category = models.ForeignKey(
+        to=Category, on_delete=models.CASCADE, null=True)
     last_edit_date = models.DateTimeField(blank=True, null=True)
     supplier = models.ForeignKey(
         to=Suppliers, on_delete=models.CASCADE, null=True)
