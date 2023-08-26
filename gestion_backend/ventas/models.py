@@ -6,7 +6,6 @@ from user.models import User
 class Client(models.Model):
     first_name = models.CharField(max_length=50, null=False, blank=False)
     last_name = models.CharField(max_length=50, null=False, blank=False)
-    dni = models.CharField(max_length=10, null=False, blank=False)
     email_address = models.EmailField(unique=True, null=False, blank=False, error_messages={
         'unique': 'El correo electrónico ya se encuentra asociado a un cliente.'
     })
@@ -17,10 +16,12 @@ class Client(models.Model):
     debt = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     credit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
+
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateField(blank=False, null=False)
-    # No se si iria en orderDetails, pero como Orders maneja aspecto generales de la orden, clavo aca total_prices
+    # Buscar la forma de hacer que por cada orden, el total sea equivalente a la suma de cada producto * cantidad
+    # asociados a una orden
     total_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0)
 
