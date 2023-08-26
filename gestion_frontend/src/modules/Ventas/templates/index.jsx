@@ -20,6 +20,7 @@ export default function VentasTemplate({
         <section className={styles.searchBar}>
           <SearchBar value={search} onChange={handleSearch} />
         </section>
+
         <section className={styles.dataTable}>
           <DataTable
             searchTerm={search}

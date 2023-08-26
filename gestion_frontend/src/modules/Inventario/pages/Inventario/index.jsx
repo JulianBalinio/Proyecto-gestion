@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { InventoryCalls } from "../../utils/apiCalls";
+import { InventoryCalls } from "/src/modules/Inventario/utils/apiCalls";
 import { getButtons, getModalObject } from "/src/modules/Inventario/utils";
 import InventarioTemplate from "/src/modules/Inventario/templates/Inventario";
+import { getColumns } from "/src/modules/Inventario/data/data";
 
 const Inventario = () => {
   const [rows, setRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [itemToEdit, setItemToEdit] = useState();
   const [openModal, setOpenModal] = useState({
     category: false,
     update: false,
@@ -21,6 +23,7 @@ const Inventario = () => {
     action: setOpenModal,
     key: "add",
     fetchInventory,
+    item: itemToEdit,
   });
 
   const pricesModalObject = getModalObject({
@@ -31,6 +34,17 @@ const Inventario = () => {
   });
 
   const buttons = getButtons({ action: setOpenModal });
+  const columns = getColumns({ setItemToEdit, setOpenModal });
+
+  useEffect(() => {
+    const allValuesAreFalse = Object.values(openModal).every(
+      (value) => value === false
+    );
+
+    if (allValuesAreFalse) {
+      setItemToEdit(null);
+    }
+  }, [openModal]);
 
   useEffect(() => {
     InventoryCalls.getInventory({ action: setRows });
@@ -42,6 +56,7 @@ const Inventario = () => {
       setSearchTerm={setSearchTerm}
       openModal={openModal}
       rows={rows}
+      columns={columns}
       buttons={buttons}
       changesModalObject={changesModalObject}
       pricesModalObject={pricesModalObject}

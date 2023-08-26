@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { InventoryCalls } from "/src/modules/Inventario/utils/apiCalls";
-import VentasTemplate from "../../templates";
+import VentasTemplate from "/src/modules/Ventas/templates";
 
 const Ventas = () => {
   const [search, setSearch] = useState("");

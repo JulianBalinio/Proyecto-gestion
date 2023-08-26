@@ -13,6 +13,7 @@ const InventarioTemplate = ({
   setSearchTerm,
   openModal,
   rows,
+  columns,
   fetchInventory,
   buttons,
   changesModalObject,
@@ -50,11 +51,12 @@ const InventarioTemplate = ({
           <DataTable
             searchTerm={searchTerm}
             rows={rows}
+            columns={columns}
             fetchInventory={fetchInventory}
           />
         </section>
 
-        {openModal.add && <ChangesModal {...changesModalObject} />}
+        <ChangesModal {...changesModalObject} />
         {openModal.prices && <PricesModal {...pricesModalObject} />}
       </main>
     </>

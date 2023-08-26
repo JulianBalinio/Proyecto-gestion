@@ -16,10 +16,17 @@ export const getButtons = ({ action }) => [
   },
 ];
 
-export const getModalObject = ({ open, action, key, fetchInventory }) => {
+export const getModalObject = ({
+  open,
+  action,
+  key,
+  fetchInventory,
+  item = null,
+}) => {
   return {
     open: open[key],
     onClose: () => action((prev) => ({ ...prev, [key]: false })),
     fetchInventory,
+    item,
   };
 };

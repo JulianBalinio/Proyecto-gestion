@@ -3,13 +3,7 @@ import { InventoryCalls } from "/src/modules/Inventario/utils/apiCalls";
 import { defaultValues, getFields } from "./data";
 import ChangesModalTemplate from "./templates/ChangesModal";
 
-export default function ChangesModal({
-  open,
-  onClose,
-  item,
-  edit,
-  fetchInventory,
-}) {
+export default function ChangesModal({ open, onClose, item, fetchInventory }) {
   const [product, setProduct] = useState(defaultValues);
   const [attributesObject, setAttributesObject] = useState();
   const [options, setOptions] = useState({
@@ -27,7 +21,7 @@ export default function ChangesModal({
 
   const handleSave = () => {
     const { category, ...payload } = product;
-    if (edit) {
+    if (item) {
       InventoryCalls.updateProduct({
         action: () => {
           fetchInventory();
@@ -73,6 +67,10 @@ export default function ChangesModal({
   }, [item]);
 
   useEffect(() => {
+    !item && setProduct(defaultValues);
+  }, [open]);
+
+  useEffect(() => {
     InventoryCalls.getOptions({ action: setOptions });
   }, []);
 
@@ -89,7 +87,7 @@ export default function ChangesModal({
       fields={fields}
       attributesObject={attributesObject}
       onClose={onClose}
-      edit={edit}
+      edit={!!item}
       handleChange={handleChange}
       handleDelete={handleDelete}
       handleSave={handleSave}

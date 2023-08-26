@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 
 //CAMELIZAR PRODUCTOS
-export const getColumns = ({ setItemToEdit, setOpen }) => {
+export const getColumns = ({ setItemToEdit, setOpenModal }) => {
   const columns = [
     { field: "id", headerName: "ID", flex: 2 },
     { field: "code", headerName: "Código", flex: 3 },
@@ -48,7 +48,7 @@ export const getColumns = ({ setItemToEdit, setOpen }) => {
       renderCell: (params) => {
         const onClick = () => {
           setItemToEdit(params.row);
-          setOpen(true);
+          setOpenModal((prev) => ({ ...prev, add: true }));
         };
 
         return <Button onClick={onClick}>Editar</Button>;
