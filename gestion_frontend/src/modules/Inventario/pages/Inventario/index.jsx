@@ -34,7 +34,11 @@ const Inventario = () => {
   });
 
   const buttons = getButtons({ action: setOpenModal });
-  const columns = getColumns({ setItemToEdit, setOpenModal });
+  const columns = getColumns({
+    module: "Inventario",
+    setItemToEdit,
+    setOpenModal,
+  });
 
   useEffect(() => {
     const allValuesAreFalse = Object.values(openModal).every(

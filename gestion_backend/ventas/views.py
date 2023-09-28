@@ -4,6 +4,7 @@ from rest_framework.viewsets import ViewSet
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from drf_yasg.utils import swagger_auto_schema
 from .models import Order, OrderDetails, Client
 from .serializers import OrderDetailsSerializer
@@ -60,23 +61,28 @@ class OrderViewset(ViewSet):
             - Código de estado: 409
             - Contenido: {'errors': [lista de errores de stock]}
         """
-        serializer = OrderDetailsSerializer(data=request.data)
+        order = request.data.get('order', [])
+        serializer = OrderDetailsSerializer(data=order, many=True)
+
         if serializer.is_valid():
             order_data = serializer.validated_data
-            order_items = order_data.get('orderdetails_set', [])
-            errors = validate_stock(order_items)
 
+            errors = validate_stock(order_data)
             if errors:
                 return Response({'errors': errors}, status=status.HTTP_409_CONFLICT)
 
-            cash_received = request.data.get('cash_received', 0)
-            client_data = request.data.get('client_data', {})
+            # cash = request.data.get('cash', 0)
+            client_data = request.data.get('client', {})
 
             with transaction.atomic():
+                breakpoint()
                 order = Order.objects.create(
                     user=request.user, order_date=timezone.now())
 
-                total_price = apply_item_discount(order_items)
+                total_price = apply_item_discount(order_data)
+                breakpoint()
+
+
                 total_price_with_discount = apply_global_discount(
                     total_price, request.data.get('global_discount', 0))
 
@@ -90,19 +96,21 @@ class OrderViewset(ViewSet):
                     except Client.DoesNotExist:
                         raise ValidationError(
                             'El cliente proporcionado no existe.')
-                    
-                    if cash_received >= total_price_with_discount:
-                        change = cash_received - total_price_with_discount
-                        client.credit -= change
-                    else:
-                        client.debt += total_price_with_discount - cash_received
+
+                    # if cash >= total_price_with_discount:
+                    #     change = cash - total_price_with_discount
+                    #     client.credit -= change
+                    # else:
+                    #     client.debt += total_price_with_discount - cash
                     client.save()
                     order.client = client
                     order.save()
 
             OrderDetails.objects.bulk_create(
                 [OrderDetails(**item) for item in order_items])
+
             return Response({'message': 'Orden creada con éxito.'}, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Delete

@@ -7,8 +7,8 @@ import styles from "./index.module.scss";
 
 export default function Header() {
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+    <Box className={styles.box}>
+      <AppBar>
         <Toolbar>
           <Typography variant="h3" component="div" sx={{ flexGrow: 1 }}>
             FácilGestor
@@ -17,6 +17,7 @@ export default function Header() {
           <div className={styles.linkContainer}>
             <Link to="/">Inventario</Link>
             <Link to="/ventas">Ventas</Link>
+            <Link to="/registro">Historial</Link>
           </div>
         </Toolbar>
       </AppBar>

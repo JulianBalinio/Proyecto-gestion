@@ -1,0 +1,79 @@
+.header {
+    width: 100%;
+    text-align: center;
+}
+
+.cardContainer {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+        width: 10px; // Ajusta el ancho de la barra de desplazamiento
+    }
+
+    // // Estilo del riel de la barra de desplazamiento
+    &::-webkit-scrollbar-track {
+        background: unset; // Cambia el color del riel de la barra según tus preferencias
+    }
+
+    // Estilo de la barra de desplazamiento en sí
+    &::-webkit-scrollbar-thumb {
+        background: #1976d2; // Cambia el color de la barra de desplazamiento según tus preferencias
+        border-radius: 12px; // Agrega bordes redondeados
+    }
+
+    .card {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 3px;
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            section {
+                display: flex;
+                align-items: center;
+            }
+
+            .footerSection {
+                display: flex;
+                align-items: center;
+
+                .endIcon {
+                    margin: 0;
+                }
+            }
+        }
+    }
+}
+
+.containerFooter {
+    height: 15%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+
+    section {
+        display: flex;
+        padding: 0 2rem;
+        align-items: center;
+        justify-content: space-between;
+        height: 90%;
+
+        article {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+
+        }
+    }
+}
