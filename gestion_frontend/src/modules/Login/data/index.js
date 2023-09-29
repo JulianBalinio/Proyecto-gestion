@@ -7,7 +7,7 @@ const getFields = (user) => {
   const fields = [
     {
       label: "Email",
-      name: "emailAddress",
+      name: "email",
       value: user.email,
       required: true,
       placeholder: "Email",

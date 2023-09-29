@@ -4,6 +4,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -11,7 +12,11 @@ from django_ratelimit.decorators import ratelimit
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from .models import User
-from .serializers import LoginSerializer, ChangePasswordSerializer
+from .serializers import LoginSerializer, ChangePasswordSerializer, CustomUserTokenSerializer
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomUserTokenSerializer
 
 
 class UserSignIn(generics.GenericAPIView):
@@ -24,7 +29,7 @@ class UserSignIn(generics.GenericAPIView):
 
         # Se busca al usuario en base al correo
         user = User.objects.filter(
-            email_address=serializer.validated_data['email_address']).first()
+            email=serializer.validated_data['email']).first()
 
         if user is None:
             return Response({'error': 'El usuario no existe.'}, status=status.HTTP_404_NOT_FOUND)

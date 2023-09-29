@@ -3,6 +3,7 @@ from django.db.models import F
 from rest_framework.views import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action, APIView, api_view
 from drf_yasg.utils import swagger_auto_schema
 from .models import Product, Category, Suppliers, Brands
@@ -10,6 +11,7 @@ from .serializers import ProductoSerializer, CategorySerializer, BrandSerializer
 
 
 class ProductosViewSet(ViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Product.objects.all()
 
     @swagger_auto_schema(operation_description="Obtener todos los productos.")
@@ -81,7 +83,7 @@ class ProductosViewSet(ViewSet):
         if serializer.validated_data.get('category'):
             products = products.filter(
                 category=serializer.validated_data['category'])
-            
+
         if serializer.validated_data.get('supplier'):
             products = products.filter(
                 supplier=serializer.validated_data['supplier'])
@@ -89,7 +91,7 @@ class ProductosViewSet(ViewSet):
         if serializer.validated_data.get('brand'):
             products = products.filter(
                 brand=serializer.validated_data['brand'])
-            
+
         serializer.update_prices(products)
 
         return Response({'message': 'Precios actualizados correctamente.'}, status=status.HTTP_200_OK)

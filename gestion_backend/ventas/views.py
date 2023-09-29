@@ -1,6 +1,7 @@
 from rest_framework.views import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
+from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
@@ -12,6 +13,8 @@ from .queries import apply_item_discount, apply_global_discount
 
 
 class OrderViewset(ViewSet):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(operation_description="Obtener todas las ordenes de compra.")
     def list(self, request):
         orders = OrderDetails.objects.all()

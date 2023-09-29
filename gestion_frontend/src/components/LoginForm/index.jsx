@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import styles from "./index.module.scss";
 
 export default function LoginForm({ onSubmit, error }) {
-  const [user, setUser] = useState({ emailAddress: "", password: "" });
+  const [user, setUser] = useState({ email: "", password: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;

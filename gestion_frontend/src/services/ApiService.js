@@ -27,10 +27,10 @@ function convertKeysSnakeToCamel(obj) {
 
 const Api = {
   getHeaders: () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      "Authorization": token && `Bearer ${token}`,
     };
     return headers;
   },

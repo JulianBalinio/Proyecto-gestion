@@ -7,6 +7,8 @@ const AuthProvider = ({ children }) => {
     (isDebugMode && localStorage.getItem("access_token")) || null
   );
 
+  console.log(token)
+
   const setAuthToken = (newToken) => {
     setToken(newToken);
     localStorage.setItem("access_token", newToken);

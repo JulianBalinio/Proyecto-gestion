@@ -2,6 +2,20 @@ from rest_framework import serializers
 from .models import User
 from inventario.models import Inventory
 from .validators import validate_password
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+class CustomUserTokenSerializer(serializers.Serializer):
+    access = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+
+    def get_access(self, obj):
+        refresh = RefreshToken.for_user(obj)
+        return {
+            'access': str(refresh.access_token),
+        }
 
 
 class InventarySerializer(serializers.ModelSerializer):
@@ -21,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id',
             'first_name',
             'last_name',
-            'email_address',
+            'email',
             'phone',
             'password',
             'inventory'
@@ -29,7 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email_address = serializers.EmailField()
+    email = serializers.EmailField()
     password = serializers.CharField(max_length=32)
 
 
