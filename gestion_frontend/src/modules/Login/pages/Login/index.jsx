@@ -9,10 +9,10 @@ export default function Login() {
   const [error, setError] = useState();
   const { setAuthToken } = useContext(AuthContext);
 
-  const afterLogin = (data) => {
-    const { access_token, detail, error, email_address } = data;
+  const afterLogin = (response) => {
+    const { access_token, detail, error, email } = response.data;
     if (!access_token) {
-      setError(detail || error || email_address);
+      setError(detail || error || email);
     } else {
       setAuthToken(access_token);
       navigate("/");
@@ -22,8 +22,8 @@ export default function Login() {
   const handleSignIn = async (userData) => {
     setError(null);
     LoginCalls.signIn({
-      action: (data) => {
-        afterLogin(data);
+      action: (response) => {
+        afterLogin(response);
       },
       payload: userData,
     });

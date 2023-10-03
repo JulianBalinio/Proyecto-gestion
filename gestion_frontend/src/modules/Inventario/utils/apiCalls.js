@@ -4,17 +4,17 @@ import { convertKeysSnakeToCamel } from "/src/services/ApiService";
 const InventoryCalls = {
   getInventory: ({ action, params = {} }) => {
     InventoryService.getInventory(params)
-      .then((data) => action(data))
+      .then((response) => action(response.data))
       .catch((err) => console.error(err));
   },
   getCategories: ({ action, params = {} }) => {
     InventoryService.getCategories(params)
-      .then((data) => action(data))
+      .then((response) => action(response.data))
       .catch((err) => console.error(err));
   },
   getOptions: ({ action, params = {} }) => {
     InventoryService.getOptions(params)
-      .then((data) => action(data))
+      .then((response) => action(response.data))
       .catch((err) => console.error(err));
   },
   createCategory: ({ action, data }) => {

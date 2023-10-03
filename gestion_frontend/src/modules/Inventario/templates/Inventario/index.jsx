@@ -14,7 +14,6 @@ const InventarioTemplate = ({
   openModal,
   rows,
   columns,
-  fetchInventory,
   buttons,
   changesModalObject,
   pricesModalObject,
@@ -52,7 +51,6 @@ const InventarioTemplate = ({
             searchTerm={searchTerm}
             rows={rows}
             columns={columns}
-            fetchInventory={fetchInventory}
           />
         </section>
 

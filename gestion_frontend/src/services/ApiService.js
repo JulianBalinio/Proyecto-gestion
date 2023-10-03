@@ -26,16 +26,18 @@ function convertKeysSnakeToCamel(obj) {
 }
 
 const Api = {
-  getHeaders: () => {
+  getHeaders: (isLogin = false) => {
     const token = localStorage.getItem("access_token");
     const headers = {
       "Content-Type": "application/json",
-      "Authorization": token && `Bearer ${token}`,
     };
+    if (!isLogin) {
+      headers.Authorization = token && `Bearer ${token}`;
+    }
     return headers;
   },
-  fetch: async (url, method = "GET", data = null) => {
-    const headers = Api.getHeaders();
+  fetch: async (url, method = "GET", data = null, isLogin = false) => {
+    const headers = Api.getHeaders(isLogin);
     const body =
       data && method !== "GET" ? { body: JSON.stringify(data) } : null;
 
@@ -45,11 +47,23 @@ const Api = {
       ...body,
     };
 
-    return fetch(url, info).then((resp) => {
+    return fetch(url, info).then(async (resp) => {
+      const response = {
+        status: resp.status,
+        data: null,
+      };
+
       if (resp.status === 204) {
-        return null;
+        return response;
       }
-      return resp.json();
+
+      try {
+        response.data = await resp.json();
+      } catch (error) {
+        console.error("Error al analizar la respuesta JSON:", error);
+      }
+
+      return response;
     });
   },
 };
