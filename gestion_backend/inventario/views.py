@@ -14,11 +14,8 @@ class ProductosViewSet(ViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Product.objects.all()
 
-    @swagger_auto_schema(operation_description="Obtener todos los productos.")
+    @swagger_auto_schema(operation_description="Obtener todos los productos asociados a un usuario")
     def list(self, request):
-        # Esta view ahora debe ir a buscar solamente los productos asociados al inventario
-        # del usuario logueado
-
         try:
             inventory = Inventory.objects.get(user=request.user)
         except Inventory.DoesNotExist:
@@ -34,22 +31,12 @@ class ProductosViewSet(ViewSet):
         serializer = ProductoSerializer(productos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(operation_description="Obtener un producto.")
-    def retrieve(self, request, pk=None):
-        try:
-            producto = Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
-            return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = ProductoSerializer(instance=producto)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @swagger_auto_schema(operation_description="Obtener opciones para agregar/editar productos.")
+    @swagger_auto_schema(operation_description="Obtener opciones para agregar/editar productos asociados a un usuario")
     @action(detail=False, methods=["GET"])
     def options(self, request):
-        categories = Category.objects.all()
-        suppliers = Suppliers.objects.all()
-        brands = Brands.objects.all()
+        categories = Category.objects.filter(user=request.user)
+        suppliers = Suppliers.objects.filter(user=request.user)
+        brands = Brands.objects.filter(user=request.user)
 
         category_serializer = CategorySerializer(categories, many=True)
         suppliers_serializer = SupplierSerializer(suppliers, many=True)
@@ -89,23 +76,38 @@ class ProductosViewSet(ViewSet):
     @swagger_auto_schema(request_body=ProductoSerializer)
     def update(self, request, pk=None):
         try:
-            producto = Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
+            # Buscar el producto a través de la relación con ProductInventory
+            product_inventory = ProductInventory.objects.get(
+                inventory_user__user=request.user, product_id=pk)
+        except ProductInventory.DoesNotExist:
             return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ProductoSerializer(producto, data=request.data)
+        # Obtener el producto asociado
+        product = product_inventory.product
+
+        # Actualizar el producto con los nuevos datos
+        serializer = ProductoSerializer(product, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+    ##TODO: Informar al usuario si intenta actualizar precios de categoria/marca/proveedor creados 
+    ## pero los mismos no contienen ningun dato.
     @swagger_auto_schema(request_body=ProductUpdateSerializer, operation_description='Actualizar precios.')
     @action(detail=False, methods=["PUT"])
     def update_prices(self, request):
         serializer = ProductUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        products = self.queryset
+        try:
+            inventory = Inventory.objects.get(user=request.user)
+        except Inventory.DoesNotExist:
+            return Response({'error': 'El inventario del usuario no existe.'}, status=status.HTTP_404_NOT_FOUND)
+
+        products = Product.objects.filter(
+            productinventory__inventory_user=inventory)
 
         if serializer.validated_data.get('category'):
             products = products.filter(
@@ -123,15 +125,28 @@ class ProductosViewSet(ViewSet):
 
         return Response({'message': 'Precios actualizados correctamente.'}, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(operation_description="Borrar producto en base a su ID.")
+    @swagger_auto_schema(operation_description="Borrar producto asociado a un usuario en base a su ID.")
     def destroy(self, request, pk=None):
         try:
-            producto = Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
+            # Busco el producto a través de la relación con ProductInventory
+            product_inventory = ProductInventory.objects.get(
+                inventory_user__user=request.user, product_id=pk)
+        except ProductInventory.DoesNotExist:
             return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
-        producto.delete()
+        product_inventory.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # DEPRECATED: NO SE ESTA USANDO POR EL MOMENTO
+    # @swagger_auto_schema(operation_description="Obtener un producto.")
+    # def retrieve(self, request, pk=None):
+    #     try:
+    #         producto = Product.objects.get(pk=pk)
+    #     except Product.DoesNotExist:
+    #         return Response({'error': 'Producto no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    #     serializer = ProductoSerializer(instance=producto)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class BaseCreateView(APIView):
@@ -145,13 +160,13 @@ class BaseCreateView(APIView):
         if serializer.is_valid():
             instance_name = instance_data.get('name')
 
-            if self.model_class.objects.filter(name=instance_name).exists():
-                return Response({'error': f'Esta {self.model_class.__name__} ya se encuentra definida.'}, status=status.HTTP_204_NO_CONTENT)
+            if self.model_class.objects.filter(user=request.user, name=instance_name).exists():
+                return Response({'error': f'{self.model_class.__name__} ya se encuentra definido.'}, status=status.HTTP_204_NO_CONTENT)
 
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response({'error': 'Categoria ya definida'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryViewSet(ViewSet, BaseCreateView):
@@ -166,7 +181,6 @@ class CategoryViewSet(ViewSet, BaseCreateView):
 
     @swagger_auto_schema(request_body=CategorySerializer)
     def create(self, request):
-        # llamado a la funcion create de la clase BaseCreateView con super()
         return super().create(request)
 
 
@@ -182,11 +196,13 @@ class BrandViewSet(ViewSet, BaseCreateView):
 
     @swagger_auto_schema(request_body=BrandSerializer)
     def create(self, request):
-        # llamado a la funcion create de la clase BaseCreateView con super()
         return super().create(request)
 
 
-class SupplierViewSet(ViewSet):
+class SupplierViewSet(ViewSet, BaseCreateView):
+    serializer_class = SupplierSerializer
+    model_class = Suppliers
+
     @swagger_auto_schema(operation_description="Obtener todas los proveedores")
     def list(self, request):
         suppliers = Suppliers.objects.all()
@@ -195,10 +211,13 @@ class SupplierViewSet(ViewSet):
 
     @swagger_auto_schema(request_body=SupplierSerializer)
     def create(self, request):
-        supplier = request.data
-        serializer = SupplierSerializer(data=supplier)
+        return super().create(request)
+    
+    # def create(self, request):
+    #     supplier = request.data
+    #     serializer = SupplierSerializer(data=supplier)
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
