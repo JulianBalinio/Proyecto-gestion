@@ -44,26 +44,21 @@ class Product(models.Model):
 
 
 # El modelo Inventory representa el inventario de un usuario específico.
-
-
 class Inventory(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product, through='ProductInventory')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"Inventario de {self.user}"
 
+
 # El modelo ProductInventory establece una relación entre un inventario y un producto específico
 # Almacena la cantidad de un producto en un inventario determinado
-
-
 class ProductInventory(models.Model):
     inventory_user = models.ForeignKey(
         Inventory,
         on_delete=models.CASCADE
     )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-
     quantity = models.PositiveIntegerField(default=0)
 
     def __str__(self):

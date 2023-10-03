@@ -19,6 +19,13 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomUserTokenSerializer
 
 
+class VerifyTokenView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({'message': 'Token válido'}, status=status.HTTP_200_OK)
+
+
 class UserSignIn(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
@@ -109,7 +116,7 @@ class RequestPasswordResetView(APIView):
             return Response({'error': 'La dirección de correo electrónico no se encuentra registrada.'})
 
 
-@csrf_exempt
+# @csrf_exempt
 class ResetPasswordView(APIView):
     @ratelimit(key='ip', rate='3/h', method='POST', block=True)
     def post(self, request):
@@ -148,7 +155,7 @@ class ResetPasswordView(APIView):
             return Response({'error': 'El token de restablecimiento es inválido.'}, status=status.HTTP_404_NOT_FOUND)
 
 
-@csrf_exempt  # Proteccion contra CSRF (Cross-Site Request Forgery)
+# @csrf_exempt  # Proteccion contra CSRF (Cross-Site Request Forgery)
 class UserLogout(APIView):
     # Solo los usuarios autenticados pueden entrar a esta APIView
     permission_classes = [IsAuthenticated]

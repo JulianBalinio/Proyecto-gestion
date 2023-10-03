@@ -5,36 +5,16 @@ from datetime import timedelta, timezone
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
+from .managers import UserManager
 
-class UserManager(BaseUserManager):
-    def create_user(self, username, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("El campo de correo electrónico es obligatorio.")
-        user = self.model(username=username, email=self.normalize_email(email), **extra_fields)
-        user.set_password(password)  # Aquí estableces la contraseña correctamente
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, username, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError("Superusuario debe tener is_staff=True.")
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError("Superusuario debe tener is_superuser=True.")
-
-        return self.create_user(username, email, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50, unique=True, default='')
     name = models.CharField(max_length=50, null=False, blank=False)
     email = models.EmailField(unique=True, null=False, blank=False, error_messages={
-                                      'unique': 'Correo electrónico en uso.'})
-    is_staff = models.BooleanField(default=False) 
-    is_active = models.BooleanField(default=True) 
+        'unique': 'Correo electrónico en uso.'})
+    is_staff = models.BooleanField(default=False)
     phone = models.CharField(max_length=15, null=False, blank=False)
-    password = models.CharField(max_length=16)
     failed_login_attempts = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
@@ -51,8 +31,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()  # Utiliza el UserManager predeterminado
 
     def __str__(self):
-        return f"{self.name}"
-    
+        return f"{self.username}"
+
     def get_by_natural_key(self, username):
         return self.get(username=username)
 
@@ -87,4 +67,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         expiration_time = self.reset_password_token_created_at + \
             timedelta(hours=1)  # Expira después de 1 hora
         return expiration_time >= timezone.now()
-

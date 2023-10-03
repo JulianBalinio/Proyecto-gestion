@@ -6,7 +6,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action, APIView, api_view
 from drf_yasg.utils import swagger_auto_schema
-from .models import Product, Category, Suppliers, Brands
+from .models import Product, Category, Suppliers, Brands, Inventory, ProductInventory
 from .serializers import ProductoSerializer, CategorySerializer, BrandSerializer, SupplierSerializer, ProductUpdateSerializer
 
 
@@ -16,7 +16,21 @@ class ProductosViewSet(ViewSet):
 
     @swagger_auto_schema(operation_description="Obtener todos los productos.")
     def list(self, request):
-        productos = Product.objects.all()
+        # Esta view ahora debe ir a buscar solamente los productos asociados al inventario
+        # del usuario logueado
+
+        try:
+            inventory = Inventory.objects.get(user=request.user)
+        except Inventory.DoesNotExist:
+            return Response(
+                {"detail": "El inventario del usuario no existe."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Obtén los productos asociados al inventario del usuario
+        productos = Product.objects.filter(
+            productinventory__inventory_user=inventory)
+
         serializer = ProductoSerializer(productos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -51,12 +65,25 @@ class ProductosViewSet(ViewSet):
 
     @swagger_auto_schema(request_body=ProductoSerializer)
     def create(self, request):
-        producto = request.data
-        serializer = ProductoSerializer(data=producto)
+        # Al crear un producto deberia comprobar si existe el inventario del usuario logueado
+        try:
+            inventory = Inventory.objects.get(user=request.user)
+        except Inventory.DoesNotExist:
+            return Response(
+                {"detail": "El inventario del usuario no existe."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
+        product = request.data
+        serializer = ProductoSerializer(data=product)
         if serializer.is_valid():
-            serializer.save()
+            product = serializer.save()
+
+            # Crea una relación entre el producto y el inventario del usuario
+            ProductInventory.objects.create(
+                inventory_user=inventory, product=product)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(request_body=ProductoSerializer)
