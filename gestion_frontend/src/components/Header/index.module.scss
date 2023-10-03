@@ -1,0 +1,14 @@
+.box {
+    height: 5vh;
+}
+
+.linkContainer {
+    display: flex;
+    gap: 2rem;
+
+    a {
+        text-decoration: none;
+        color: white;
+        font-size: 1.5rem;
+    }
+}

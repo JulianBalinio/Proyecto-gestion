@@ -1,0 +1,21 @@
+.root {
+    padding: 2rem;
+
+    .closeIcon {
+        display: flex;
+        justify-content: end;
+    }
+
+    .body {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .footer {
+        display: flex;
+        justify-content: end;
+    }
+
+}
