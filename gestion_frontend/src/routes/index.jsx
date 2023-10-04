@@ -1,6 +1,7 @@
 import Login from "/src/modules/Login/pages/Login";
 import Home from "/src/modules/Inventario/pages/Inventario"
 import Ventas from "/src/modules/Ventas/pages/Ventas"
+import Historial from "/src/modules/Historial/pages/Historial";
 
 const routes = [
   {
@@ -19,6 +20,10 @@ const routes = [
     path: "/ventas",
     element: <Ventas />,
   },
+  {
+    path: "/historial",
+    element: <Historial />
+  }
 ];
 
 export default routes;

@@ -17,7 +17,7 @@ export default function Header() {
           <div className={styles.linkContainer}>
             <Link to="/">Inventario</Link>
             <Link to="/ventas">Ventas</Link>
-            <Link to="/registro">Historial</Link>
+            <Link to="/historial">Historial</Link>
           </div>
         </Toolbar>
       </AppBar>

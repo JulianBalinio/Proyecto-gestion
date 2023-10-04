@@ -2,7 +2,7 @@ import random
 import string
 import uuid
 from datetime import timedelta, timezone
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 from .managers import UserManager

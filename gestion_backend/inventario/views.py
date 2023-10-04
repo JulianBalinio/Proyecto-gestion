@@ -4,7 +4,7 @@ from rest_framework.views import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action, APIView, api_view
+from rest_framework.decorators import action, APIView
 from drf_yasg.utils import swagger_auto_schema
 from .models import Product, Category, Suppliers, Brands, Inventory, ProductInventory
 from .serializers import ProductoSerializer, CategorySerializer, BrandSerializer, SupplierSerializer, ProductUpdateSerializer
@@ -92,9 +92,8 @@ class ProductosViewSet(ViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-    ##TODO: Informar al usuario si intenta actualizar precios de categoria/marca/proveedor creados 
-    ## pero los mismos no contienen ningun dato.
+    # TODO: Informar al usuario si intenta actualizar precios de categoria/marca/proveedor creados
+    # pero los mismos no contienen ningun dato.
     @swagger_auto_schema(request_body=ProductUpdateSerializer, operation_description='Actualizar precios.')
     @action(detail=False, methods=["PUT"])
     def update_prices(self, request):
@@ -212,12 +211,3 @@ class SupplierViewSet(ViewSet, BaseCreateView):
     @swagger_auto_schema(request_body=SupplierSerializer)
     def create(self, request):
         return super().create(request)
-    
-    # def create(self, request):
-    #     supplier = request.data
-    #     serializer = SupplierSerializer(data=supplier)
-
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
