@@ -28,11 +28,13 @@ export default function PricesModal({ open = true, onClose, fetchInventory }) {
   const [updateOption, setUpdateOption] = useState("percentage");
   const [selectedOption, setSelectedOption] = useState("");
   const [updateValue, setUpdateValue] = useState();
-  const { showSuccessAlert, alertDialog, closeAlert } = useAlert();
+  const { showSuccessAlert, showErrorAlert, alertDialog, closeAlert } =
+    useAlert();
 
   const handleSave = () => {
     InventoryCalls.updatePrices({
-      action: () => {
+      action: (response) => {
+        console.log(response, "response en el action");
         showSuccessAlert({
           handleAccept: () => {
             fetchInventory();
@@ -52,6 +54,11 @@ export default function PricesModal({ open = true, onClose, fetchInventory }) {
           updateType: updateOption,
           [updateOption]: updateValue,
         },
+      },
+      dealWithError: (error) => {
+        showErrorAlert();
+        console.log(error);
+        console.log("aca");
       },
     });
   };

@@ -1,8 +1,15 @@
 from rest_framework import serializers
-from .models import OrderDetails, Product
+from .models import OrderDetails, Product, Order
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ('order_date',)
 
 
 class OrderDetailsSerializer(serializers.ModelSerializer):
+    order_date = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderDetails
@@ -12,12 +19,16 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
             'client',
             'product',
             'quantity',
+            'order_date'
         ]
         extra_kwargs = {
             'id': {'required': False},
             'client': {'required': False},
             'order': {'required': False}
         }
+
+    def get_order_date(self, obj):
+        return obj.order.order_date
 
     def create(self, validated_data):
         # Obtiene el ID del producto de la data validada
@@ -27,7 +38,8 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
         try:
             product = Product.objects.get(id=product_id)
         except Product.DoesNotExist:
-            raise serializers.ValidationError({'product': f'Producto con ID {product_id} no encontrado.'})
+            raise serializers.ValidationError(
+                {'product': f'Producto con ID {product_id} no encontrado.'})
 
         # Actualiza la data validada con la instancia de producto
         validated_data['product'] = product

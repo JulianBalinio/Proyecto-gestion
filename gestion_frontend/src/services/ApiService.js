@@ -1,5 +1,33 @@
-function snakeToCamelCase(str) {
+function camelToSnake(str) {
   return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+}
+function snakeToCamel(str) {
+  return str.replace(/_([a-z])/g, function (match, letter) {
+    return letter.toUpperCase();
+  });
+}
+
+function convertKeysCamelToSnake(obj) {
+  if (typeof obj !== "object" || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => convertKeysCamelToSnake(item));
+  }
+
+  const convertedObj = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const camelCaseKey = camelToSnake(key);
+      const value = obj[key];
+      convertedObj[camelCaseKey] =
+        typeof value === "object" && value !== null
+          ? convertKeysCamelToSnake(value)
+          : value;
+    }
+  }
+  return convertedObj;
 }
 
 function convertKeysSnakeToCamel(obj) {
@@ -14,7 +42,7 @@ function convertKeysSnakeToCamel(obj) {
   const convertedObj = {};
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const camelCaseKey = snakeToCamelCase(key);
+      const camelCaseKey = snakeToCamel(key);
       const value = obj[key];
       convertedObj[camelCaseKey] =
         typeof value === "object" && value !== null
@@ -47,25 +75,41 @@ const Api = {
       ...body,
     };
 
-    return fetch(url, info).then(async (resp) => {
-      const response = {
-        status: resp.status,
-        data: null,
-      };
+    return fetch(url, info)
+      .then(async (resp) => {
+        const response = {
+          status: resp.status,
+          data: null,
+        };
 
-      if (resp.status === 204) {
+        if (resp.status === 204) {
+          return response;
+        }
+
+        if (resp.status === 400) {
+          try {
+            response.data = await resp.json();
+            console.error(response.data);
+          } catch (error) {
+            console.error("Error al analizar la respuesta JSON:", error);
+          }
+          return response;
+        }
+
+        try {
+          response.data = await resp.json();
+        } catch (error) {
+          console.error("Error al analizar la respuesta JSON:", error);
+        }
+
         return response;
-      }
-
-      try {
-        response.data = await resp.json();
-      } catch (error) {
-        console.error("Error al analizar la respuesta JSON:", error);
-      }
-
-      return response;
-    });
+      })
+      .catch((error) => {
+        console.error("Error en la llamada a fetch:", error);
+        // Puedes lanzar el error nuevamente si quieres que sea manejado en el código que llama a esta función
+        throw error;
+      });
   },
 };
 
-export { Api, convertKeysSnakeToCamel };
+export { Api, convertKeysCamelToSnake, convertKeysSnakeToCamel };

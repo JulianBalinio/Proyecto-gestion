@@ -23,7 +23,12 @@ const routes = [
   {
     path: "/historial",
     element: <Historial />
-  }
+  },
+  {
+    path: "/historial/verHistorial",
+    element: <Home />
+  },
+
 ];
 
 export default routes;

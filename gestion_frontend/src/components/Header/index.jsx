@@ -5,7 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import styles from "./index.module.scss";
 
-export default function Header() {
+export default function Header({ isLogin = false }) {
   return (
     <Box className={styles.box}>
       <AppBar>
@@ -14,11 +14,13 @@ export default function Header() {
             FácilGestor
           </Typography>
 
-          <div className={styles.linkContainer}>
-            <Link to="/">Inventario</Link>
-            <Link to="/ventas">Ventas</Link>
-            <Link to="/historial">Historial</Link>
-          </div>
+          {!isLogin && (
+            <div className={styles.linkContainer}>
+              <Link to="/">Inventario</Link>
+              <Link to="/ventas">Ventas</Link>
+              <Link to="/historial">Historial</Link>
+            </div>
+          )}
         </Toolbar>
       </AppBar>
     </Box>

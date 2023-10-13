@@ -6,10 +6,12 @@ import DataTable from "/src/components/DataTable";
 import styles from "./index.module.scss";
 import ActualOrder from "../components/ActualOrder";
 import { Divider } from "@mui/material";
+import AlertDialog from "/src/components/AlertDialog";
 
 export default function VentasTemplate({
   search,
   handleSearch,
+  alertDialogObject,
   handleClick,
   rows,
   columns,
@@ -43,8 +45,14 @@ export default function VentasTemplate({
         <Divider orientation="vertical" />
 
         <aside className={styles.order}>
-          <ActualOrder order={order} setOrder={setOrder} handleClick={handleClick} />
+          <ActualOrder
+            order={order}
+            setOrder={setOrder}
+            handleClick={handleClick}
+          />
         </aside>
+
+        <AlertDialog {...alertDialogObject} />
       </main>
     </>
   );

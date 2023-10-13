@@ -44,7 +44,7 @@ export const useAlert = () => {
 
   const showErrorAlert = ({
     title = "Error",
-    description = "Error descripcion",
+    description = "Hubo un error en el sistema.",
     handleAccept,
     handleClose,
     showCancel = false,

@@ -1,5 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
+from django.utils.translation import gettext_lazy
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,8 +12,9 @@ SECRET_KEY = 'django-insecure-*y9gs=_+mp498to252=!c-j*t&rpyp-k$+eybe_dsoc^)mx#pf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'localhost'
+]
 
 # Application definition
 
@@ -142,15 +145,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
-
+DEFAULT_CHARSET = 'utf-8'
 LANGUAGE_CODE = 'es-ES'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
