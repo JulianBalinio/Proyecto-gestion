@@ -3,6 +3,7 @@ from user.models import User
 
 
 class Category(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=20, null=False, blank=False)
 
     def __str__(self):
@@ -10,6 +11,7 @@ class Category(models.Model):
 
 
 class Brands(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=20, null=False, blank=False)
 
     def __str__(self):
@@ -17,6 +19,7 @@ class Brands(models.Model):
 
 
 class Suppliers(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=20, null=False, blank=False)
     address = models.CharField(max_length=30)
     phone = models.CharField(max_length=20)

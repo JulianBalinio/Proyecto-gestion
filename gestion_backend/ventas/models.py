@@ -22,22 +22,18 @@ class Order(models.Model):
     #     ('porcentaje', 'Porcentaje'),
     #     ('precio', 'Precio'),
     # ]
-
-    # Buscar la forma de hacer que por cada orden, el total sea equivalente a la suma de cada producto * cantidad
-    # asociados a una orden
-    # total_price = models.DecimalField(
-        # max_digits=10, decimal_places=2, default=0)
-
     # discount_type = models.CharField(max_length=10, choices=OPCIONES)
-    order_date = models.DateField(blank=False, null=False)
+    order_date = models.DateTimeField(blank=False, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    total_price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
-        return f"Order #{self.pk} - Date:{self.order_date}"
+        return f"Orden #{self.pk} - Fecha y Hora: {self.order_date}"
 
 
 class OrderDetails(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
     order = models.ForeignKey(to=Order, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=0)

@@ -4,18 +4,15 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-*y9gs=_+mp498to252=!c-j*t&rpyp-k$+eybe_dsoc^)mx#pf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'localhost', '192.168.0.7'
+]
 
 # Application definition
 
@@ -29,7 +26,6 @@ INSTALLED_APPS = [
     'django_extensions',
     'corsheaders',
     'rest_framework',
-    'rest_framework_simplejwt',
     'drf_yasg',
     'inventario',
     'ventas',
@@ -37,7 +33,12 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
@@ -89,6 +90,24 @@ TEMPLATES = [
     },
 ]
 
+SITE_URL = 'http://localhost:8000'
+
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': f'{SITE_URL}/admin/login',
+    'LOGOUT_URL': f'{SITE_URL}/admin/logout',
+    # "DEFAULT_AUTO_SCHEMA_CLASS": "rafam.swagger.CustomAutoSchema",
+    'SECURITY_DEFINITIONS': {
+        "api_key": {
+            "type": "apiKey",
+            "name": "authorization",
+            "in": "header"
+        },
+        "basic": {
+            "type": "basic"
+        }
+    },
+}
+
 WSGI_APPLICATION = 'gestion_backend.wsgi.application'
 
 
@@ -124,15 +143,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
-
+DEFAULT_CHARSET = 'utf-8'
 LANGUAGE_CODE = 'es-ES'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

@@ -14,6 +14,15 @@ const Inventario = () => {
     add: false,
   });
 
+  const filteredRows =
+    rows?.length &&
+    rows.filter(
+      (item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.id.toString().includes(searchTerm.toString()) ||
+        item.code.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
   const fetchInventory = () => {
     return InventoryCalls.getInventory({ action: setRows });
   };
@@ -59,7 +68,7 @@ const Inventario = () => {
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
       openModal={openModal}
-      rows={rows}
+      rows={searchTerm ? filteredRows : rows}
       columns={columns}
       buttons={buttons}
       changesModalObject={changesModalObject}

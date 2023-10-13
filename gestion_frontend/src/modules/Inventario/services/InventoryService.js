@@ -3,11 +3,17 @@ const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export const InventoryService = {
   getInventory: async (params) => {
-    const result = await Api.fetch(`${VITE_API_URL}/inventario/productos/`, "GET");
+    const result = await Api.fetch(
+      `${VITE_API_URL}/inventario/productos/`,
+      "GET"
+    );
     return result;
   },
   getCategories: async (params) => {
-    const result = await Api.fetch(`${VITE_API_URL}/inventario/categories/`, "GET");
+    const result = await Api.fetch(
+      `${VITE_API_URL}/inventario/categories/`,
+      "GET"
+    );
     return result;
   },
   getOptions: async (params) => {
@@ -50,12 +56,17 @@ export const InventoryService = {
     return result;
   },
   updatePrices: async (payload) => {
-    const result = await Api.fetch(
-      `${VITE_API_URL}/inventario/productos/update_prices/`,
-      "PUT",
-      payload
-    );
-    return result;
+    try {
+      const result = await Api.fetch(
+        `${VITE_API_URL}/inventario/productos/update_prices/`,
+        "PUT",
+        payload
+      );
+      return result;
+    } catch (error) {
+      console.error("Error en updatePrices:", error);
+      throw error; // Asegúrate de lanzar el error nuevamente para que pueda ser manejado en el catch del llamador
+    }
   },
   updateProduct: async (payload, productId) => {
     const result = await Api.fetch(

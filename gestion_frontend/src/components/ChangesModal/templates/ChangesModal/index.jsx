@@ -53,7 +53,7 @@ export default function ChangesModalTemplate({
                     onChange={(e) => handleChange(e)}
                   >
                     {field.select &&
-                      field.options.map((option, key) => {
+                      field.options?.map((option, key) => {
                         return (
                           <MenuItem key={key} value={option.id}>
                             {option.name}

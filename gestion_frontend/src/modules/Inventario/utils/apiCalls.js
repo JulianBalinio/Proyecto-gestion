@@ -1,20 +1,23 @@
 import { InventoryService } from "../services/InventoryService";
-import { convertKeysSnakeToCamel } from "/src/services/ApiService";
+import {
+  convertKeysSnakeToCamel,
+  convertKeysCamelToSnake,
+} from "/src/services/ApiService";
 
 const InventoryCalls = {
   getInventory: ({ action, params = {} }) => {
     InventoryService.getInventory(params)
-      .then((data) => action(data))
+      .then((response) => action(response.data))
       .catch((err) => console.error(err));
   },
   getCategories: ({ action, params = {} }) => {
     InventoryService.getCategories(params)
-      .then((data) => action(data))
+      .then((response) => action(response.data))
       .catch((err) => console.error(err));
   },
   getOptions: ({ action, params = {} }) => {
     InventoryService.getOptions(params)
-      .then((data) => action(data))
+      .then((response) => action(response.data))
       .catch((err) => console.error(err));
   },
   createCategory: ({ action, data }) => {
@@ -37,10 +40,10 @@ const InventoryCalls = {
       .then((data) => action(data))
       .catch((err) => console.error(err));
   },
-  updatePrices: ({ action, data }) => {
-    InventoryService.updatePrices(convertKeysSnakeToCamel(data))
+  updatePrices: ({ action, data, dealWithError }) => {
+    InventoryService.updatePrices(convertKeysCamelToSnake(data))
       .then((data) => action(data))
-      .catch((err) => console.error(err));
+      .catch((err) => dealWithError(err));
   },
   updateProduct: ({ action, data, productId }) => {
     InventoryService.updateProduct(convertKeysSnakeToCamel(data), productId)

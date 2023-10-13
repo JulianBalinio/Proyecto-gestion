@@ -1,22 +1,14 @@
 import { DataGrid, esES } from "@mui/x-data-grid";
 const { localeText } = esES.components.MuiDataGrid.defaultProps;
 
-function DataTable({ searchTerm, rows, columns }) {
-  const filteredRows = rows.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.id.toString().includes(searchTerm.toString()) ||
-      item.code.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+function DataTable({ rows, columns }) {
   return (
     <>
       <DataGrid
-        rows={filteredRows}
+        rows={rows}
         columns={columns}
-        pageSize={5}
         showCellVerticalBorder
-        rowsPerPageOptions={[5]}
+        pageSizeOptions={[25, 50, 100]}
         localeText={localeText}
       />
     </>

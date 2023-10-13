@@ -1,0 +1,24 @@
+.main {
+  display: flex;
+  flex-direction: column;
+
+  .searchBar {
+    padding: 0 2rem 2rem;
+    display: flex;
+    gap: 2rem;
+  }
+
+  .dataTable {
+    display: flex;
+    flex-direction: column;
+    padding: 0 2rem;
+    height: 70vh;
+
+    .footer {
+      display: flex;
+      gap: 2rem;
+      align-self: flex-end;
+      align-items: center;
+    }
+  }
+}

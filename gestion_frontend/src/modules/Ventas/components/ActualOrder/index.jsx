@@ -18,8 +18,10 @@ import Heading from "/src/components/Heading";
 
 export default function ActualOrder({ order, setOrder, handleClick }) {
   const getTotal = (order) => {
-    return order.reduce((acc, prod) => prod.price * prod.quantity + acc, 0).toFixed(2)
-  }
+    return order
+      .reduce((acc, prod) => prod.price * prod.quantity + acc, 0)
+      .toFixed(2);
+  };
 
   return (
     <>
@@ -61,9 +63,9 @@ export default function ActualOrder({ order, setOrder, handleClick }) {
                       prev.map((prod) =>
                         prod.id === producto.id
                           ? {
-                            ...prod,
-                            quantity: Math.max(1, prod.quantity - 1),
-                          }
+                              ...prod,
+                              quantity: Math.max(1, prod.quantity - 1),
+                            }
                           : prod
                       )
                     )
@@ -83,9 +85,9 @@ export default function ActualOrder({ order, setOrder, handleClick }) {
                         prev.map((prod) =>
                           prod.id === producto.id
                             ? {
-                              ...prod,
-                              quantity: Math.max(0, newValue),
-                            }
+                                ...prod,
+                                quantity: Math.max(0, newValue),
+                              }
                             : prod
                         )
                       );
@@ -101,9 +103,9 @@ export default function ActualOrder({ order, setOrder, handleClick }) {
                       prev.map((prod) =>
                         prod.id === producto.id
                           ? {
-                            ...prod,
-                            quantity: Math.max(1, prod.quantity + 1),
-                          }
+                              ...prod,
+                              quantity: Math.max(1, prod.quantity + 1),
+                            }
                           : prod
                       )
                     )
@@ -122,7 +124,11 @@ export default function ActualOrder({ order, setOrder, handleClick }) {
       <footer className={styles.containerFooter}>
         <Divider></Divider>
         <section>
-          <Button variant={"contained"} onClick={handleClick}>
+          <Button
+            variant={"contained"}
+            onClick={handleClick}
+            disabled={!order.length}
+          >
             CONFIRMAR PEDIDO
           </Button>
 

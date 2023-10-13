@@ -13,6 +13,11 @@ const LoginCalls = {
     LoginService.signUp(snakePayload)
       .then((data) => action(data))
       .catch((err) => console.error(err));
+  },
+  verifyToken: ({action}) => {
+    LoginService.verifyToken()
+      .then((data) => action(data))
+      .catch((err) => console.error(err));
   }
 };
 

@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { InventoryCalls } from "/src/modules/Inventario/utils/apiCalls";
-import VentasTemplate from "/src/modules/Ventas/templates";
 import { getColumns } from "/src/modules/Inventario/data/data";
 import { SalesCalls } from "../../utils/apiCalls";
+import { useAlert } from "/src/common/hooks/useAlert";
+import VentasTemplate from "/src/modules/Ventas/templates";
 
 const Ventas = () => {
   const [search, setSearch] = useState("");
   const [rows, setRows] = useState([]);
   const [order, setOrder] = useState([]);
-
-  console.log(order)
+  const { showSuccessAlert, showErrorAlert, alertDialog, closeAlert } =
+    useAlert();
 
   const handleSearch = (e) => {
     const { value } = e.target;
@@ -17,12 +18,33 @@ const Ventas = () => {
   };
 
   const onSubmit = () => {
-    const orderBack = order.map(prod => ({ product: prod.id, quantity: prod.quantity }))
+    const orderBack = order.map((prod) => ({
+      product: prod.id,
+      quantity: prod.quantity,
+    }));
     SalesCalls.createOrder({
-      action: (response) => { console.log(response) },
-      data: { order: orderBack }
-    })
-  }
+      action: (response) => {
+        response.status === 201 &&
+          showSuccessAlert({
+            handleAccept: () => {
+              setOrder([]);
+              closeAlert();
+            },
+            handleClose: () => {
+              setOrder([]);
+              closeAlert();
+            },
+          });
+      },
+      data: { order: orderBack },
+      dealWithError: (error) => {
+        alert(error);
+        showErrorAlert({
+          description: error,
+        });
+      },
+    });
+  };
 
   const fetchInventory = () => {
     InventoryCalls.getInventory({ action: setRows });
@@ -35,6 +57,7 @@ const Ventas = () => {
   return (
     <VentasTemplate
       search={search}
+      alertDialogObject={alertDialog}
       handleSearch={handleSearch}
       handleClick={onSubmit}
       rows={rows}
