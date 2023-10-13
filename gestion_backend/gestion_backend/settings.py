@@ -1,7 +1,5 @@
 from pathlib import Path
 from datetime import timedelta
-from django.utils.translation import gettext_lazy
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,7 +11,7 @@ SECRET_KEY = 'django-insecure-*y9gs=_+mp498to252=!c-j*t&rpyp-k$+eybe_dsoc^)mx#pf
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'localhost'
+    'localhost', '192.168.0.7'
 ]
 
 # Application definition
